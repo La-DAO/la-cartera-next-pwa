@@ -35,8 +35,8 @@ export default function Home() {
             </Heading>
           </VStack>
           <Box py={16}>
-            <Button px={8} py={6} variant="primary" fontSize="xl">
-              ¡Únete!
+            <Button px={8} py={6} variant="secondary" fontSize="xl">
+              🚧 En desarrollo: ETHOnline 2023 🏗️
             </Button>
           </Box>
         </Flex>

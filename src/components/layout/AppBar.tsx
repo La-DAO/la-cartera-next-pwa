@@ -208,6 +208,7 @@ export function BottomNavbar() {
               isRound={true}
               variant="outline"
               colorScheme="whiteAlpha"
+              style={{ border: "1.5px solid #f6f2e6" }}
               aria-label="Notificaciones"
               icon={
                 <svg
@@ -238,6 +239,7 @@ export function BottomNavbar() {
               variant="solid"
               colorScheme="orange"
               bgColor="primary"
+              style={{ border: "1.5px solid #f25b3d" }}
               aria-label="Cartera"
               icon={
                 <svg
@@ -245,7 +247,7 @@ export function BottomNavbar() {
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
-                  stroke="currentColor"
+                  stroke="white"
                   height={28}
                   width={28}
                 >
@@ -270,6 +272,7 @@ export function BottomNavbar() {
               isRound={true}
               variant="outline"
               colorScheme="whiteAlpha"
+              style={{ border: "1.5px solid #f6f2e6" }}
               aria-label="Mensajes"
               icon={
                 <svg
