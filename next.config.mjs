@@ -3,20 +3,20 @@
  * for Docker builds.
  */
 await import("./src/env.mjs");
+import withPWAInit from "@ducanh2912/next-pwa";
 
 /** @type {import("next").NextConfig} */
-const config = {
+const nextConfig = {
   reactStrictMode: true,
-
-  /**
-   * If you are using `appDir` then you must comment the below `i18n` config out.
-   *
-   * @see https://github.com/vercel/next.js/issues/41980
-   */
+  productionBrowserSourceMaps: true,
   i18n: {
     locales: ["en"],
     defaultLocale: "en",
   },
 };
 
-export default config;
+const withPWA = withPWAInit({
+  dest: "public",
+});
+
+export default withPWA(nextConfig);

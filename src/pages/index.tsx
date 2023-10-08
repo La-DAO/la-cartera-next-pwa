@@ -1,5 +1,5 @@
 import { PageWithAppBar } from "~/components/layout/AppBar";
-import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
+import { Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 
 export default function Home() {
   return (
