@@ -29,19 +29,20 @@ const theme = extendTheme({
     ldWhiteNeutral: "#FFFDF5", // Background color (light mode)
     ldWhiteBeige: "#f6f2e6",
     ldBlackNight: "#0b0b0a",
+    ldBlackOrange: "#4e2118",
     ldBlackJet: {
       100: "#2B2B26",
       300: "#23231F",
       500: "#1A1A17",
       700: "#181815",
-      900: "#121210",
+      900: "#121210", // Background color (dark mode)
     },
     ldGreenDeep: {
       100: "#2E6054",
       300: "#275046",
       500: "#1F4038",
       700: "#1D2D28",
-      900: "#1C2420", // Background color (dark mode)
+      900: "#1C2420",
     },
     ldOrange: {
       100: "#f79d8b",
@@ -74,7 +75,7 @@ const theme = extendTheme({
           boxShadow: "inset 0 0 0 2px #f6f2e6",
           color: "ldWhiteBeige",
           _hover: {
-            bg: "ldBlackJet.500",
+            bg: "ldBlackOrange",
           },
         },
         "black-outline": {
@@ -101,7 +102,7 @@ theme.styles.global = (
   props: Record<string, unknown> | StyleFunctionProps
 ) => ({
   "html, body": {
-    backgroundColor: mode("ldBlackJet.900", "ldBlackJet.500")(props),
+    backgroundColor: mode("ldBlackJet.900", "ldBlackJet.900")(props),
     color: mode("ldWhiteBeige", "ldWhiteBeige")(props),
   },
   a: {
@@ -111,10 +112,10 @@ theme.styles.global = (
     },
   },
   nav: {
-    backgroundColor: mode("ldBlackNight", "ldBlackJet.900")(props),
+    backgroundColor: mode("ldBlackNight", "ldBlackNight")(props),
   },
   "div.bottom-nav": {
-    backgroundColor: mode("ldBlackNight", "ldBlackJet.900")(props),
+    backgroundColor: mode("ldBlackNight", "ldBlackNight")(props),
   },
 });
 

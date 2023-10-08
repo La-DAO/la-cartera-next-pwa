@@ -23,7 +23,7 @@ import {
 } from "@chakra-ui/react";
 
 export const APPBAR_HEIGHT_PX = 56;
-export const NAVBAR_HEIGHT_PX = 64;
+export const NAVBAR_HEIGHT_PX = 72;
 
 export interface AppBarProps {
   title?: string;
@@ -46,6 +46,9 @@ const MenuDrawer = ({ onSignoutHandler }: { onSignoutHandler: () => void }) => {
             color="ldWhiteBeige"
             h={[8, null, 7]}
             w={[8, null, 7]}
+            _hover={{
+              color: "primary",
+            }}
           />
         }
         size="md"
@@ -58,9 +61,20 @@ const MenuDrawer = ({ onSignoutHandler }: { onSignoutHandler: () => void }) => {
         finalFocusRef={btnRef}
       >
         <DrawerOverlay />
-        <DrawerContent bgColor="ldBlackJet.500" pt={[8, null, 6]} pb={16}>
-          <DrawerCloseButton size="lg" color="ldWhiteBeige" />
-          <DrawerHeader fontSize={["2xl"]}>Menú</DrawerHeader>
+        <DrawerContent
+          bgColor="ldBlackJet.900"
+          maxH="100svh"
+          pt={[8, null, 6]}
+          pb={16}
+        >
+          <DrawerCloseButton
+            size="lg"
+            color="ldWhiteBeige"
+            _hover={{ background: "transparent", color: "primary" }}
+          />
+          <DrawerHeader color="primary" fontSize={["2xl"]}>
+            Menú
+          </DrawerHeader>
           <DrawerBody px={12}>
             <List spacing={4} fontSize={["lg"]}>
               <ListItem display="flex" alignItems="center">
@@ -135,7 +149,7 @@ const MenuDrawer = ({ onSignoutHandler }: { onSignoutHandler: () => void }) => {
   );
 };
 
-export const AppBar: React.FC<AppBarProps> = (props) => {
+export const AppBar: React.FC<AppBarProps> = () => {
   return (
     <Box
       as="nav"
@@ -184,11 +198,9 @@ export function BottomNavbar() {
       bottom={0}
       height={`${NAVBAR_HEIGHT_PX}px`}
       width="100vw"
-      bgColor="whiteAlpha.900"
-      color="blackAlpha.900"
     >
       <Flex
-        mb={2}
+        mb={3}
         w={["90%", null, "50%", "30%"]}
         justifyContent="center"
         alignItems="center"
@@ -208,7 +220,12 @@ export function BottomNavbar() {
               isRound={true}
               variant="outline"
               colorScheme="whiteAlpha"
-              style={{ border: "1.5px solid #f6f2e6" }}
+              style={{
+                border: "1.5px solid #f6f2e6",
+              }}
+              _hover={{
+                backgroundColor: "#4e2118",
+              }}
               aria-label="Notificaciones"
               icon={
                 <svg
@@ -273,6 +290,9 @@ export function BottomNavbar() {
               variant="outline"
               colorScheme="whiteAlpha"
               style={{ border: "1.5px solid #f6f2e6" }}
+              _hover={{
+                backgroundColor: "#4e2118",
+              }}
               aria-label="Mensajes"
               icon={
                 <svg
