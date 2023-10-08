@@ -67,7 +67,7 @@ const theme = extendTheme({
           bg: "primary",
           color: "ldWhiteNeutral",
           _hover: {
-            bg: "ldOrange.400",
+            bg: "ldOrange.700",
           },
         },
         secondary: {
@@ -76,6 +76,20 @@ const theme = extendTheme({
           color: "ldWhiteBeige",
           _hover: {
             bg: "ldBlackOrange",
+          },
+        },
+        outline: {
+          bg: "ldBlackNight",
+          boxShadow: "inset 0 0 0 2px #f25b3d",
+          color: "primary",
+          fontWeight: "semibold",
+          _disabled: {
+            bg: "ldBlackNight",
+            boxShadow: "inset 0 0 0 2px #f25b3d",
+            color: "primary",
+          },
+          _hover: {
+            bg: "ldBlackJet.700",
           },
         },
         "black-outline": {
@@ -89,9 +103,19 @@ const theme = extendTheme({
         },
       },
     },
+    Heading: { baseStyle: { fontWeight: "semibold" } },
     Link: {
       baseStyle: {
         _hover: { color: "primary", textDecoration: "none" },
+      },
+    },
+    Spinner: {
+      baseStyle: {},
+      sizes: {
+        "2xl": {
+          height: 16,
+          width: 16,
+        },
       },
     },
   },
@@ -111,6 +135,7 @@ theme.styles.global = (
       textDecoration: "none",
     },
   },
+  h1: { color: "primary" },
   nav: {
     backgroundColor: mode("ldBlackNight", "ldBlackNight")(props),
   },

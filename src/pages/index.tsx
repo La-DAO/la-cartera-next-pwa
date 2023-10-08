@@ -1,5 +1,6 @@
 import { PageWithAppBar } from "~/components/layout/AppBar";
 import { Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
+import { Link } from "@chakra-ui/next-js";
 
 export default function Home() {
   return (
@@ -35,6 +36,13 @@ export default function Home() {
             </Heading>
           </VStack>
           <Flex justifyContent="center" py={16}>
+            <Link href="/ingresar">
+              <Button px={8} py={4} variant="primary" fontSize="xl" size="lg">
+                Ingresar
+              </Button>
+            </Link>
+          </Flex>
+          <Flex justifyContent="center">
             <Button
               px={8}
               py={4}
