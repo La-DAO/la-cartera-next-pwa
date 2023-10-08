@@ -1,5 +1,5 @@
 import { PageWithAppBar } from "~/components/layout/AppBar";
-import { Box, Button, Flex, Heading, VStack } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 
 export default function Home() {
   return (
@@ -34,11 +34,20 @@ export default function Home() {
               con la Comunidad
             </Heading>
           </VStack>
-          <Box py={16}>
-            <Button px={8} py={6} variant="secondary" fontSize="xl">
-              🚧 En desarrollo: ETHOnline 2023 🏗️
+          <Flex justifyContent="center" py={16}>
+            <Button
+              px={8}
+              py={4}
+              variant="secondary"
+              fontSize="xl"
+              style={{ height: "unset", whiteSpace: "initial" }}
+            >
+              <Text noOfLines={2}>
+                🚧 En construcción 🏗️
+                <br /> ETHOnline 2023
+              </Text>
             </Button>
-          </Box>
+          </Flex>
         </Flex>
       </PageWithAppBar>
     </>
