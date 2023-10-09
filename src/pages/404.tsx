@@ -5,7 +5,7 @@ import { PageWithAppBar } from "~/components/layout/AppBar";
 export default function NotFound() {
   return (
     <PageWithAppBar>
-      <Box textAlign="center" py={[32, null, 16]} px={16}>
+      <Box textAlign="center" py={[32, null, 16, 24, 32]} px={16}>
         <Heading display="inline-block" as="h2" size="3xl" color="primary">
           404
         </Heading>

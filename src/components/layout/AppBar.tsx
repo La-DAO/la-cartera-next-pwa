@@ -98,7 +98,7 @@ const MenuDrawer = ({
                 <>
                   <ListItem display="flex" alignItems="center">
                     <Link
-                      href="#"
+                      href="/micuenta"
                       display="flex"
                       w="full"
                       alignItems="center"
@@ -348,7 +348,7 @@ export function BottomNavbar() {
             />
           </Box>
         </Link>
-        <Link variant="unstyled" href="/">
+        <Link variant="unstyled" href="/cartera">
           <Box
             height="100%"
             display="flex"
