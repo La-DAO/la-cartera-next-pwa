@@ -24,6 +24,22 @@ const config = {
       },
     ],
     "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      {
+        checksVoidReturn: {
+          arguments: false,
+          attributes: false,
+        },
+      },
+    ],
+    "@typescript-eslint/no-floating-promises": [
+      "error",
+      {
+        ignoreIIFE: true,
+        ignoreVoid: true,
+      },
+    ],
   },
 };
 

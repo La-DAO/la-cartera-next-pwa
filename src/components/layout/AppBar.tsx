@@ -1,6 +1,8 @@
-import React from "react";
-
+import React, { useState } from "react";
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/router";
 import { Link } from "@chakra-ui/next-js";
+
 import { BellIcon, HamburgerIcon, SettingsIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -30,7 +32,16 @@ export interface AppBarProps {
   navTitle?: string;
 }
 
-const MenuDrawer = ({ onSignoutHandler }: { onSignoutHandler: () => void }) => {
+type MenuDrawerProps = {
+  authenticated: boolean;
+  isLoading: boolean;
+  onSignoutHandler: () => void;
+};
+const MenuDrawer = ({
+  authenticated,
+  isLoading,
+  onSignoutHandler,
+}: MenuDrawerProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef<HTMLButtonElement>(null);
 
@@ -76,73 +87,142 @@ const MenuDrawer = ({ onSignoutHandler }: { onSignoutHandler: () => void }) => {
             Menú
           </DrawerHeader>
           <DrawerBody px={12}>
-            <List spacing={4} fontSize={["lg"]}>
-              <ListItem display="flex" alignItems="center">
-                <Link
-                  href="#"
-                  display="flex"
-                  w="full"
-                  alignItems="center"
-                  gap={4}
-                  onClick={onClose}
-                >
-                  <Icon
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    h={5}
-                    w={5}
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                      clip-rule="evenodd"
-                    />
-                  </Icon>
-                  Perfil
-                </Link>
-              </ListItem>
-
-              <ListItem display="flex" alignItems="center">
-                <Link
-                  href="#"
-                  display="flex"
-                  w="full"
-                  alignItems="center"
-                  gap={4}
-                  onClick={onClose}
-                >
-                  <SettingsIcon boxSize={5} />
-                  Configuración
-                </Link>
-              </ListItem>
-              <ListItem display="flex" alignItems="center">
-                <Link
-                  href="#"
-                  display="flex"
-                  w="full"
-                  alignItems="center"
-                  gap={4}
-                  onClick={onClose}
-                >
-                  <BellIcon boxSize={5} />
-                  Notificaciones
-                </Link>
-              </ListItem>
+            <List spacing={4} fontSize={["xl"]}>
+              {authenticated ? (
+                <>
+                  <ListItem display="flex" alignItems="center">
+                    <Link
+                      href="#"
+                      display="flex"
+                      w="full"
+                      alignItems="center"
+                      gap={4}
+                      onClick={onClose}
+                    >
+                      <Icon
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        h={5}
+                        w={5}
+                      >
+                        <path d="M20 2H8a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2zm-6 2.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5zM19 15H9v-.25C9 12.901 11.254 11 14 11s5 1.901 5 3.75V15z" />
+                        <path d="M4 8H2v12c0 1.103.897 2 2 2h12v-2H4V8z" />
+                      </Icon>
+                      Cuenta
+                    </Link>
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <Link
+                      href="#"
+                      display="flex"
+                      w="full"
+                      alignItems="center"
+                      gap={4}
+                      onClick={onClose}
+                    >
+                      <SettingsIcon boxSize={5} />
+                      Configuración
+                    </Link>
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <Link
+                      href="#"
+                      display="flex"
+                      w="full"
+                      alignItems="center"
+                      gap={4}
+                      onClick={onClose}
+                    >
+                      <BellIcon boxSize={5} />
+                      Notificaciones
+                    </Link>
+                  </ListItem>
+                </>
+              ) : (
+                <>
+                  <ListItem display="flex" alignItems="center">
+                    <Link
+                      href="/"
+                      display="flex"
+                      alignItems="center"
+                      gap={4}
+                      onClick={onClose}
+                    >
+                      Inicio
+                    </Link>
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <Link
+                      href="#"
+                      display="flex"
+                      alignItems="center"
+                      gap={4}
+                      onClick={onClose}
+                    >
+                      Documentación
+                    </Link>
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <Link
+                      href="#"
+                      display="flex"
+                      alignItems="center"
+                      gap={4}
+                      onClick={onClose}
+                    >
+                      Comunidad
+                    </Link>
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <Link
+                      href="#"
+                      display="flex"
+                      alignItems="center"
+                      gap={4}
+                      onClick={onClose}
+                    >
+                      Nosotros
+                    </Link>
+                  </ListItem>
+                </>
+              )}
             </List>
+            {!authenticated && (
+              <Flex px={12} mt={8}>
+                <Link
+                  href="/ingresar"
+                  display="flex"
+                  w="full"
+                  alignItems="center"
+                  gap={4}
+                  onClick={onClose}
+                >
+                  <Button variant="primary" size={["lg", null, "md"]} w="full">
+                    Ingresar
+                  </Button>
+                </Link>
+              </Flex>
+            )}
           </DrawerBody>
-          <DrawerFooter px={12}>
-            <Button
-              variant="secondary"
-              w="full"
-              onClick={() => {
-                onSignoutHandler();
-                onClose();
-              }}
-            >
-              Logout
-            </Button>
-          </DrawerFooter>
+          {authenticated && (
+            <DrawerFooter px={12}>
+              <Button
+                variant="secondary"
+                size={["lg", null, "md"]}
+                w="full"
+                onClick={() => {
+                  onSignoutHandler();
+                  onClose();
+                }}
+                isLoading={isLoading}
+                loadingText="Saliendo..."
+                spinnerPlacement="end"
+              >
+                Cerrar sesión
+              </Button>
+            </DrawerFooter>
+          )}
         </DrawerContent>
       </Drawer>
     </>
@@ -150,6 +230,22 @@ const MenuDrawer = ({ onSignoutHandler }: { onSignoutHandler: () => void }) => {
 };
 
 export const AppBar: React.FC<AppBarProps> = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { push } = useRouter();
+  const { authenticated, logout } = usePrivy();
+
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      await logout();
+      await push("/ingresar");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box
       as="nav"
@@ -169,7 +265,7 @@ export const AppBar: React.FC<AppBarProps> = () => {
         justifyContent="space-between"
         w="100%"
       >
-        <Flex alignItems="center" gap={2}>
+        <Link as="div" display="flex" gap={2} alignItems="center" href="/">
           <Image
             src="/logos/la-cartera-cacao.png"
             alt="LaCartera logo: una fruta del cacao partida a la mitad"
@@ -179,9 +275,11 @@ export const AppBar: React.FC<AppBarProps> = () => {
           <Text fontSize="2xl" fontWeight="bold">
             LaCartera
           </Text>
-        </Flex>
+        </Link>
         <MenuDrawer
-          onSignoutHandler={() => console.log("onSignoutHandler called")}
+          authenticated={authenticated}
+          isLoading={isLoading}
+          onSignoutHandler={handleLogout}
         />
       </Box>
     </Box>
@@ -220,9 +318,6 @@ export function BottomNavbar() {
               isRound={true}
               variant="outline"
               colorScheme="whiteAlpha"
-              style={{
-                border: "1.5px solid #f6f2e6",
-              }}
               _hover={{
                 backgroundColor: "#4e2118",
               }}
@@ -253,10 +348,10 @@ export function BottomNavbar() {
           >
             <IconButton
               isRound={true}
-              variant="solid"
-              colorScheme="orange"
               bgColor="primary"
-              style={{ border: "1.5px solid #f25b3d" }}
+              _hover={{
+                backgroundColor: "#913725",
+              }}
               aria-label="Cartera"
               icon={
                 <svg
@@ -289,7 +384,6 @@ export function BottomNavbar() {
               isRound={true}
               variant="outline"
               colorScheme="whiteAlpha"
-              style={{ border: "1.5px solid #f6f2e6" }}
               _hover={{
                 backgroundColor: "#4e2118",
               }}
@@ -320,6 +414,8 @@ export function BottomNavbar() {
 export const PageWithAppBar: React.FC<
   AppBarProps & { children: React.ReactNode }
 > = (props) => {
+  const { authenticated } = usePrivy();
+
   return (
     <>
       <AppBar {...props} />
@@ -335,7 +431,7 @@ export const PageWithAppBar: React.FC<
       >
         {props.children}
       </Box>
-      <BottomNavbar />
+      {authenticated && <BottomNavbar />}
     </>
   );
 };
