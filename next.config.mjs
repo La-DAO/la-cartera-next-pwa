@@ -4,15 +4,14 @@
  */
 await import("./src/env.mjs");
 import withPWAInit from "@ducanh2912/next-pwa";
+import pkg from './next-i18next.config.js';
+const { i18n } = pkg;
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: true,
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
+  i18n,
 };
 
 const withPWA = withPWAInit({

@@ -8,6 +8,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { api } from "~/utils/api";
 import theme from "~/theme";
 import { chainsConfig } from "~/lib/wagmiPrivyClient";
+import { appWithTranslation } from 'next-i18next';
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
 
@@ -25,4 +26,4 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   );
 };
 
-export default api.withTRPC(MyApp);
+export default api.withTRPC(appWithTranslation(MyApp));

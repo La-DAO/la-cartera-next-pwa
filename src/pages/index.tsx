@@ -1,8 +1,12 @@
 import { PageWithAppBar } from "~/components/layout/AppBar";
 import { Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import { Link } from "@chakra-ui/next-js";
+import { useTranslation } from 'next-i18next';
 
-export default function Home() {
+function Home() {
+  const { t } = useTranslation('common');
+  console.log("Hello");
+  console.log(t('caca'));
   return (
     <>
       <PageWithAppBar>
@@ -23,7 +27,7 @@ export default function Home() {
               color="primary"
               fontWeight="bold"
             >
-              LaCartera
+              {t('app_title')}
             </Heading>
             <Heading
               as="h3"
@@ -31,14 +35,13 @@ export default function Home() {
               textAlign="center"
               fontWeight="medium"
             >
-              Tus primeros pasos en Web3 <br />
-              con la Comunidad
+              {t('app_welcome')}
             </Heading>
           </VStack>
           <Flex justifyContent="center" py={16}>
             <Link href="/ingresar">
               <Button px={8} py={4} variant="primary" fontSize="xl" size="lg">
-                Ingresar
+              {t('login_button')}
               </Button>
             </Link>
           </Flex>
@@ -61,3 +64,5 @@ export default function Home() {
     </>
   );
 }
+
+export default Home;
