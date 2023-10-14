@@ -37,10 +37,6 @@
     "wagmi": "^1.4.3",
     "zod": "^3.21.4"
   },
-  "peerDependencies": {
-    "i18next": "^23.5.1",
-    "react-i18next": "^13.3.0"
-  },
   "devDependencies": {
     "@types/eslint": "^8.44.2",
     "@types/node": "^18.16.0",
