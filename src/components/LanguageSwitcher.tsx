@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "next-i18next";
-import { ChevronDownIcon } from "@chakra-ui/icons";
+
 import {
   Menu,
   MenuButton,
@@ -8,11 +8,17 @@ import {
   MenuList,
   MenuItem,
   Portal,
+  Spinner,
 } from "@chakra-ui/react";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 
 export default function LanguageSwitcher() {
-  const [appLanguage, setAppLanguage] = useState("es");
+  const [appLanguage, setAppLanguage] = useState<string | null>(null);
   const { i18n } = useTranslation("common");
+
+  useEffect(() => {
+    setAppLanguage(i18n.language);
+  }, [i18n.language]);
 
   const esLanguageBtnRef = useRef<HTMLButtonElement | null>(null);
   const enLanguageBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -23,12 +29,7 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <Menu
-      autoSelect={false}
-      // initialFocusRef={
-      //   appLanguage === "es" ? esLanguageBtnRef : enLanguageBtnRef
-      // }
-    >
+    <Menu autoSelect={false}>
       <MenuButton
         as={Button}
         variant="secondary"
@@ -40,7 +41,7 @@ export default function LanguageSwitcher() {
         size="sm"
         width={16}
       >
-        {appLanguage}
+        {appLanguage ? appLanguage : <Spinner color="primary" size="sm" />}
       </MenuButton>
       <Portal>
         <MenuList minWidth={0} width={16}>
