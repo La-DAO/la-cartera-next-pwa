@@ -3,6 +3,10 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useRouter } from "next/router";
 
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation, withTranslation } from "next-i18next";
+import nextI18nConfig from "../../next-i18next.config.mjs";
+
 import {
   Box,
   Button,
@@ -23,6 +27,7 @@ import { truncateAddress } from "~/utils/string";
 import { Link } from "@chakra-ui/next-js";
 
 const MiCuenta = () => {
+  const { t } = useTranslation("common");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
   const { push } = useRouter();
@@ -97,11 +102,11 @@ const MiCuenta = () => {
           {authenticated ? (
             <>
               <Heading as="h1" fontSize={["4xl"]}>
-                Mi Cuenta
+                {t('my_keys')}
               </Heading>
               <Box px={4} textAlign="left" w="100%">
                 <Heading as="h2" fontSize="2xl" mb={2}>
-                  Cartera activa:
+                  {t('active_key')}:
                 </Heading>
                 <Flex
                   display="flex"
@@ -117,7 +122,7 @@ const MiCuenta = () => {
                   >
                     {activeWallet
                       ? truncateAddress(activeWallet.address, 12, 10)
-                      : "No tienes cartera activa"}
+                      : t('warn_no_active_key')}
                   </Text>
                   <Text
                     display={["none", null, null, null, "block"]}
@@ -128,7 +133,7 @@ const MiCuenta = () => {
                   >
                     {activeWallet
                       ? activeWallet.address
-                      : "No tienes cartera activa"}
+                      : t('warn_no_active_key')}
                   </Text>
                   {activeWallet && (
                     <Link
@@ -150,18 +155,18 @@ const MiCuenta = () => {
                       size="lg"
                       onClick={handleSwitchNetwork}
                     >
-                      Cambiar red
+                      {t('change_network_button')}
                     </Button>
                   </Flex>
                 )}
               </Box>
               <Box px={4} textAlign="left" w="100%">
                 <Heading as="h2" fontSize="2xl" mb={4}>
-                  Carteras conectadas
+                  {t('available_keys')}
                 </Heading>
                 {wallets.length === 0 ? (
                   <Text fontSize="xl" ml={2}>
-                    No tienes carteras disponibles
+                    {t('warn_no_keys')}
                   </Text>
                 ) : (
                   <List>
@@ -198,7 +203,7 @@ const MiCuenta = () => {
                                 isDisabled={true}
                                 w="100%"
                               >
-                                Active
+                                {t('active_state')}
                               </Button>
                             ) : (
                               <Button
@@ -206,7 +211,7 @@ const MiCuenta = () => {
                                 w="100%"
                                 onClick={() => void setActiveWallet(wallet)}
                               >
-                                Activate
+                                {t('activate_button')}
                               </Button>
                             )}
                           </GridItem>
@@ -226,7 +231,7 @@ const MiCuenta = () => {
                       loadingText="Creando..."
                       spinnerPlacement="end"
                     >
-                      Crear cartera
+                      {t('create_key_button')}
                     </Button>
                   </Flex>
                 )}
@@ -237,15 +242,15 @@ const MiCuenta = () => {
                   size="lg"
                   onClick={handleLogout}
                   isLoading={isLoading}
-                  loadingText="Saliendo..."
+                  loadingText={t('loader_msg_closing')}
                   spinnerPlacement="end"
                 >
-                  Cerrar Sesión
+                  {t('logout_button')}
                 </Button>
               </Box>
             </>
           ) : (
-            <LoaderPage text="Redireccionando..." />
+            <LoaderPage text={t('loader_msg_redirecting')} />
           )}
         </Flex>
       </Flex>
@@ -253,4 +258,13 @@ const MiCuenta = () => {
   );
 };
 
-export default MiCuenta;
+export default withTranslation("common")(MiCuenta);
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale, ["common"], nextI18nConfig, [
+      "es",
+      "en",
+    ])),
+  },
+});
