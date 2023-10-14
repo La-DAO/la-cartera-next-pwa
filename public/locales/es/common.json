@@ -1,5 +1,18 @@
 {
   "app_title": "LaCartera",
   "app_welcome": "Tus primeros pasos en Web3",
-  "login_button": "Entrar"
+  "login_button": "Entrar",
+  "construction_msg": "En construcción",
+  "start_session": "Iniciar sesión",
+  "my_keys": "Mis Llaves",
+  "active_key": "Llave activa",
+  "available_keys": "Llaves disponibles",
+  "warn_no_keys": "No hay llaves disponibles",
+  "create_key_button": "Crear llave",
+  "change_network_button": "Cambiar Red",
+  "connected_keys": "Connected keys",
+  "activate_button": "Activar",
+  "active_state": "En Uso",
+  "loader_msg_closing": "Saliendo. . .",
+  "loader_msg_redirecting": "Redireccionando. . ."
 }
