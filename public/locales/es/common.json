@@ -2,6 +2,7 @@
   "app_title": "LaCartera",
   "app_welcome": "Tus primeros pasos en Web3",
   "login_button": "Entrar",
+  "logout_button": "Salir",
   "construction_msg": "En construcción",
   "start_session": "Iniciar sesión",
   "my_keys": "Mis Llaves",
