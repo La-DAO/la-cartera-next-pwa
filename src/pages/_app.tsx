@@ -27,7 +27,6 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   );
 };
 
-// @ts-expect-error - propTypes wtf???
 const I18nApp = appWithTranslation(MyApp, nextI18nConfig);
 
 export default api.withTRPC(I18nApp);
