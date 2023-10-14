@@ -9,6 +9,7 @@
   "active_key": "Active key",
   "available_keys": "Available keys",
   "warn_no_keys": "No available keys",
+  "warn_no_active_key": "No active key",
   "create_key_button": "Create key",
   "change_network_button": "Change Network",
   "connected_keys": "Connected keys",

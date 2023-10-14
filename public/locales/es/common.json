@@ -8,6 +8,7 @@
   "active_key": "Llave activa",
   "available_keys": "Llaves disponibles",
   "warn_no_keys": "No hay llaves disponibles",
+  "warn_no_active_key": "No hay llave activa",
   "create_key_button": "Crear llave",
   "change_network_button": "Cambiar Red",
   "connected_keys": "Connected keys",
