@@ -137,7 +137,7 @@ const MiCuenta = () => {
                   </Text>
                   {activeWallet && (
                     <Link
-                      href={`https://polygonscan.com/address/${activeWallet.address}`}
+                      href={`https://mumbai.polygonscan.com/address/${activeWallet.address}`}
                       target="_blank"
                     >
                       <IconButton

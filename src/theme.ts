@@ -123,6 +123,11 @@ const theme = extendTheme({
         },
       },
     },
+    Modal: {
+      baseStyle: {
+        dialog: { background: "ldBlackJet.500" },
+      },
+    },
     Spinner: {
       baseStyle: {},
       sizes: {
