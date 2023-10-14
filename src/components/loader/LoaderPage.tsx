@@ -1,6 +1,6 @@
 import { Flex, Spinner, Text } from "@chakra-ui/react";
 
-const LoaderPage = ({ text = "Cargando..." }: { text?: string }) => {
+const LoaderPage = ({ text = ".. .. .." }: { text?: string }) => {
   return (
     <Flex
       flexDirection="column"

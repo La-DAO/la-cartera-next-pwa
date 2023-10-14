@@ -109,6 +109,20 @@ const theme = extendTheme({
         _hover: { color: "primary", textDecoration: "none" },
       },
     },
+    Menu: {
+      baseStyle: {
+        list: {
+          backgroundColor: "ldBlackNight",
+          border: "2px",
+        },
+        item: {
+          backgroundColor: "transparent",
+          _hover: {
+            backgroundColor: "ldBlackOrange",
+          },
+        },
+      },
+    },
     Spinner: {
       baseStyle: {},
       sizes: {
