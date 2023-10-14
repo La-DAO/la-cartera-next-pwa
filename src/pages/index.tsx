@@ -1,8 +1,14 @@
-import { PageWithAppBar } from "~/components/layout/AppBar";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation, withTranslation } from "next-i18next";
+
 import { Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import { Link } from "@chakra-ui/next-js";
 
-export default function Home() {
+import nextI18nConfig from "../../next-i18next.config.mjs";
+import { PageWithAppBar } from "~/components/layout/AppBar";
+
+function Home() {
+  const { t } = useTranslation("common");
   return (
     <>
       <PageWithAppBar>
@@ -23,7 +29,7 @@ export default function Home() {
               color="primary"
               fontWeight="bold"
             >
-              LaCartera
+              {t("app_title")}
             </Heading>
             <Heading
               as="h3"
@@ -31,14 +37,13 @@ export default function Home() {
               textAlign="center"
               fontWeight="medium"
             >
-              Tus primeros pasos en Web3 <br />
-              con la Comunidad
+              {t("app_welcome")}
             </Heading>
           </VStack>
           <Flex justifyContent="center" py={16}>
             <Link href="/ingresar">
               <Button px={8} py={4} variant="primary" fontSize="xl" size="lg">
-                Ingresar
+                {t("login_button")}
               </Button>
             </Link>
           </Flex>
@@ -51,7 +56,7 @@ export default function Home() {
               style={{ height: "unset", whiteSpace: "initial" }}
             >
               <Text noOfLines={2}>
-                🚧 En construcción 🏗️
+                🚧 {t('construction_msg')} 🏗️
                 <br /> ETHOnline 2023
               </Text>
             </Button>
@@ -61,3 +66,14 @@ export default function Home() {
     </>
   );
 }
+
+export default withTranslation("common")(Home);
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale, ["common"], nextI18nConfig, [
+      "es",
+      "en",
+    ])),
+  },
+});

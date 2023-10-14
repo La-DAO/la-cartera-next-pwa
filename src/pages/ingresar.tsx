@@ -3,6 +3,10 @@ import { useRouter } from "next/router";
 import { useLogin, usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation, withTranslation } from "next-i18next";
+import nextI18nConfig from "../../next-i18next.config.mjs";
+
 import {
   Box,
   Button,
@@ -20,6 +24,7 @@ import LoaderPage from "~/components/loader/LoaderPage";
 import { truncateAddress } from "~/utils/string";
 
 const Login = () => {
+  const { t } = useTranslation("common");
   const { push } = useRouter();
   const { ready, authenticated, logout } = usePrivy();
   const { wallets } = useWallets();
@@ -57,7 +62,7 @@ const Login = () => {
         {!authenticated ? (
           <>
             <Heading as="h1" fontSize={["4xl"]} mt={[8, null, 0]}>
-              Inicia Sesión
+              {t('start_session')}
             </Heading>
             <Button
               size={["lg", null, null, "md"]}
@@ -65,17 +70,17 @@ const Login = () => {
               onClick={login}
               px={[null, null, 6, 8]}
             >
-              Ingresar
+              {t('login_button')}
             </Button>
           </>
         ) : (
           <>
             <Heading as="h1" fontSize={["4xl"]}>
-              Mi Cuenta
+            {t('my_keys')}
             </Heading>
             <Box px={4} textAlign="left" w="100%">
               <Heading as="h2" fontSize="2xl" mb={2}>
-                Cartera activa:
+                {t('active_key')}:
               </Heading>
               <Text fontSize="xl" fontWeight="medium" ml={2}>
                 {truncateAddress(activeWallet?.address, 12, 10)}
@@ -83,7 +88,7 @@ const Login = () => {
             </Box>
             <Box px={4} textAlign="left" w="100%">
               <Heading as="h2" fontSize="2xl" mb={4}>
-                Carteras conectadas
+                {t('connected_keys')}
               </Heading>
               <List>
                 {wallets.map((wallet) => (
@@ -102,7 +107,7 @@ const Login = () => {
                       <GridItem px={2}>
                         {wallet.address === activeWallet?.address ? (
                           <Button variant="outline" isDisabled={true} w="100%">
-                            Active
+                            {t('active_state')}
                           </Button>
                         ) : (
                           <Button
@@ -110,7 +115,7 @@ const Login = () => {
                             w="100%"
                             onClick={() => void setActiveWallet(wallet)}
                           >
-                            Activate
+                            {t('activate_button')}
                           </Button>
                         )}
                       </GridItem>
@@ -125,7 +130,7 @@ const Login = () => {
                 size="lg"
                 onClick={() => void logout()}
               >
-                Cerrar Sesión
+                {t('logout_button')}
               </Button>
             </Box>
           </>
@@ -135,4 +140,13 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default withTranslation("common")(Login);
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale, ["common"], nextI18nConfig, [
+      "es",
+      "en",
+    ])),
+  },
+});
