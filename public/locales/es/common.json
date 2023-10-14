@@ -16,5 +16,13 @@
   "activate_button": "Activar",
   "active_state": "En Uso",
   "loader_msg_closing": "Saliendo. . .",
-  "loader_msg_redirecting": "Redireccionando. . ."
+  "loader_msg_redirecting": "Redireccionando. . .",
+  "menudrawer_menu": "Menú",
+  "menudrawer_keys": "Llaves",
+  "menudrawer_settings": "Configuración",
+  "menudrawer_notifications": "Notificaciones",
+  "menudrawer_home": "Inicio",
+  "menudrawer_documentation": "Documentación",
+  "menudrawer_community": "Comunidad",
+  "menudrawer_aboutus": "Nosotros"
 }
