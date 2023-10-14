@@ -4,11 +4,12 @@ import { PrivyWagmiConnector } from "@privy-io/wagmi-connector";
 
 import { type AppType } from "next/app";
 import { ChakraProvider } from "@chakra-ui/react";
+import { appWithTranslation } from "next-i18next";
 
 import { api } from "~/utils/api";
 import theme from "~/theme";
 import { chainsConfig } from "~/lib/wagmiPrivyClient";
-import { appWithTranslation } from 'next-i18next';
+import nextI18nConfig from "../../next-i18next.config.mjs";
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
 
@@ -26,4 +27,4 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   );
 };
 
-export default api.withTRPC(appWithTranslation(MyApp));
+export default api.withTRPC(appWithTranslation(MyApp, nextI18nConfig));

@@ -24,7 +24,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
-import LanguageSwitcher from '../LanguageSwitcher';
+import LanguageSwitcher from "../LanguageSwitcher";
 
 export const APPBAR_HEIGHT_PX = 56;
 export const NAVBAR_HEIGHT_PX = 72;
@@ -278,12 +278,14 @@ export const AppBar: React.FC<AppBarProps> = () => {
             LaCartera
           </Text>
         </Link>
-        <LanguageSwitcher/>
-        <MenuDrawer
-          authenticated={authenticated}
-          isLoading={isLoading}
-          onSignoutHandler={handleLogout}
-        />
+        <Flex alignItems="center" gap={4}>
+          <LanguageSwitcher />
+          <MenuDrawer
+            authenticated={authenticated}
+            isLoading={isLoading}
+            onSignoutHandler={handleLogout}
+          />
+        </Flex>
       </Box>
     </Box>
   );
