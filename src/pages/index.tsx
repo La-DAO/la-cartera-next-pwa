@@ -1,5 +1,5 @@
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useTranslation } from "next-i18next";
+import { useTranslation, withTranslation } from "next-i18next";
 
 import { Button, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import { Link } from "@chakra-ui/next-js";
@@ -67,7 +67,7 @@ function Home() {
   );
 }
 
-export default Home;
+export default withTranslation("common")(Home);
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => ({
   props: {
