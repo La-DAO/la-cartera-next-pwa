@@ -56,7 +56,7 @@ function Home() {
               style={{ height: "unset", whiteSpace: "initial" }}
             >
               <Text noOfLines={2}>
-                🚧 En construcción 🏗️
+                🚧 {t('construction_msg')} 🏗️
                 <br /> ETHOnline 2023
               </Text>
             </Button>
