@@ -3,6 +3,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/router";
 import { Link } from "@chakra-ui/next-js";
 
+import { useTranslation } from "next-i18next";
+
 import { BellIcon, HamburgerIcon, SettingsIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -39,6 +41,7 @@ type MenuDrawerProps = {
   isLoading: boolean;
   onSignoutHandler: () => void;
 };
+
 const MenuDrawer = ({
   authenticated,
   isLoading,
@@ -46,6 +49,7 @@ const MenuDrawer = ({
 }: MenuDrawerProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef<HTMLButtonElement>(null);
+  const { t } = useTranslation("common");
 
   return (
     <>
@@ -86,7 +90,7 @@ const MenuDrawer = ({
             _hover={{ background: "transparent", color: "primary" }}
           />
           <DrawerHeader color="primary" fontSize={["2xl"]}>
-            Menú
+            {t('menudrawer_menu')}
           </DrawerHeader>
           <DrawerBody px={12}>
             <List spacing={4} fontSize={["xl"]}>
@@ -111,7 +115,7 @@ const MenuDrawer = ({
                         <path d="M20 2H8a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2zm-6 2.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5zM19 15H9v-.25C9 12.901 11.254 11 14 11s5 1.901 5 3.75V15z" />
                         <path d="M4 8H2v12c0 1.103.897 2 2 2h12v-2H4V8z" />
                       </Icon>
-                      Cuenta
+                      {t('menudrawer_keys')}
                     </Link>
                   </ListItem>
                   <ListItem display="flex" alignItems="center">
@@ -124,7 +128,7 @@ const MenuDrawer = ({
                       onClick={onClose}
                     >
                       <SettingsIcon boxSize={5} />
-                      Configuración
+                      {t('menudrawer_settings')}
                     </Link>
                   </ListItem>
                   <ListItem display="flex" alignItems="center">
@@ -137,7 +141,7 @@ const MenuDrawer = ({
                       onClick={onClose}
                     >
                       <BellIcon boxSize={5} />
-                      Notificaciones
+                      {t('menudrawer_notifications')}
                     </Link>
                   </ListItem>
                 </>
@@ -151,7 +155,7 @@ const MenuDrawer = ({
                       gap={4}
                       onClick={onClose}
                     >
-                      Inicio
+                      {t('menudrawer_home')}
                     </Link>
                   </ListItem>
                   <ListItem display="flex" alignItems="center">
@@ -162,7 +166,7 @@ const MenuDrawer = ({
                       gap={4}
                       onClick={onClose}
                     >
-                      Documentación
+                      {t('menudrawer_documentation')}
                     </Link>
                   </ListItem>
                   <ListItem display="flex" alignItems="center">
@@ -173,7 +177,7 @@ const MenuDrawer = ({
                       gap={4}
                       onClick={onClose}
                     >
-                      Comunidad
+                      {t('menudrawer_community')}
                     </Link>
                   </ListItem>
                   <ListItem display="flex" alignItems="center">
@@ -184,7 +188,7 @@ const MenuDrawer = ({
                       gap={4}
                       onClick={onClose}
                     >
-                      Nosotros
+                      {t('menudrawer_aboutus')}
                     </Link>
                   </ListItem>
                 </>
@@ -201,7 +205,7 @@ const MenuDrawer = ({
                   onClick={onClose}
                 >
                   <Button variant="primary" size={["lg", null, "md"]} w="full">
-                    Ingresar
+                    {t('login_button')}
                   </Button>
                 </Link>
               </Flex>
@@ -221,7 +225,7 @@ const MenuDrawer = ({
                 loadingText="Saliendo..."
                 spinnerPlacement="end"
               >
-                Cerrar sesión
+                {t('logout_button')}
               </Button>
             </DrawerFooter>
           )}
