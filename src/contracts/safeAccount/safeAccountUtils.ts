@@ -1,30 +1,56 @@
 import { ethers } from 'ethers';
-import { EthersAdapter, SafeFactory, SafeAccountConfig } from '@safe-global/protocol-kit';
+import { EthersAdapter, SafeFactory, type SafeAccountConfig } from '@safe-global/protocol-kit';
+import Safe from '@safe-global/protocol-kit';
 import SafeApiKit from '@safe-global/api-kit';
-import { SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
 import { SAFE_SERVICE_URLS } from './safeServicesURLS';
-import { getEthersProvider, walletClientToSigner } from '../wagmiAdapters';
-import { type WalletClient, getWalletClient } from '@wagmi/core'
+import { walletClientToSigner } from '../wagmiAdapters';
+import { type WalletClient } from '@wagmi/core'
 
 /**
- * Creating a transaction for a Safe
+ * Initiating a transaction for a Safe
  * REFERENCES:
  * https://docs.safe.global/safe-core-aa-sdk/protocol-kit#making-a-transaction-from-a-safe
  */
-export async function createSafeTx(
+export async function initiateSafeTx(
   walletClient: WalletClient,
+  safeAddr: string,
   toDestination: string,
-  value: string,
-  data: string
+  valueIntegerAmount: string,
+  contractCallData: string
 ) {
   const txCreator = walletClientToSigner(walletClient);
   const chainId = await getChainIdFromSigner(txCreator);
-  // TODO Handle warning from below: `Object is possibly undefined`
-  const txServiceUrl = SAFE_SERVICE_URLS[chainId].url ?
-    SAFE_SERVICE_URLS[chainId].url : '';
+  if (!SAFE_SERVICE_URLS[chainId]) throw `No defined Safe Service URL for chainId ${chainId}`
+  const txServiceUrl:string = SAFE_SERVICE_URLS[chainId]!.url;
   const ethAdapter = getSafeEthersAdapter(txCreator);
   const safeService = new SafeApiKit({ txServiceUrl, ethAdapter: ethAdapter });
 
+  // Create Safe instance
+  const safe = await Safe.create({
+    ethAdapter,
+    safeAddress: safeAddr
+  })
+
+  const safeTransactionData: SafeTransactionDataPartial = {
+    to: toDestination,
+    data: contractCallData,
+    value: ethers.utils.parseEther(valueIntegerAmount).toString()
+  };
+
+  const safeTransaction = await safe.createTransaction({ safeTransactionData });
+  const senderAddress = await txCreator.getAddress()
+  const safeTxHash = await safe.getTransactionHash(safeTransaction)
+  const signature = await safe.signTransactionHash(safeTxHash)
+
+  // Propose transaction to the service
+  await safeService.proposeTransaction({
+    safeAddress: await safe.getAddress(),
+    safeTransactionData: safeTransaction.data,
+    safeTxHash,
+    senderAddress,
+    senderSignature: signature.data
+  })
 }
 
 export function computeNewSafeAddress() {
@@ -42,12 +68,21 @@ export async function createUserPaidNewSafeAccount(
   const deployer = walletClientToSigner(walletClient);
   const ethAdapter = getSafeEthersAdapter(deployer);
   const safeFactory = await SafeFactory.create({ ethAdapter: ethAdapter });
-  const safeAccountConfig: SafeAccountConfig = {
-    owners: [
+  let safeOwners: string[];
+  if (otherKeys) {
+    safeOwners = [
       await deployer.getAddress(),
-      // await owner2Signer.getAddress(),
-    ],
-    threshold: 2,
+      ...otherKeys
+    ];
+  } else {
+    safeOwners = [
+      await deployer.getAddress()
+    ];
+  }
+
+  const safeAccountConfig: SafeAccountConfig = {
+    owners: safeOwners,
+    threshold: safeOwners.length,
     // ... (Optional params)
   }
   const newSafeAccount = await safeFactory.deploySafe({ safeAccountConfig })
@@ -65,5 +100,6 @@ function getSafeEthersAdapter(etherSigner: ethers.providers.JsonRpcSigner) {
 async function getChainIdFromSigner(
   signer: ethers.providers.JsonRpcSigner
 ): Promise<string> {
-  return parseInt(await signer.provider.send('eth_chainId', [])).toString()
+  const hexChainId: string = await signer.provider.send('eth_chainId', []) as string;
+  return parseInt(hexChainId).toString()
 }
