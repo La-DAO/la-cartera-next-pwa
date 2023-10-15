@@ -60,7 +60,7 @@ const MiCuenta = () => {
     return provider?.getSigner();
   };
 
-  const handleCreateWallet = async () => {
+  const handleCreateKey = async () => {
     setIsLoadingCreateWallet(true);
     try {
       await createWallet();
@@ -265,7 +265,7 @@ const MiCuenta = () => {
                     <Button
                       variant="primary"
                       size="lg"
-                      onClick={handleCreateWallet}
+                      onClick={handleCreateKey}
                       isDisabled={!(ready && authenticated)}
                       isLoading={isLoadingCreateWallet}
                       loadingText="Creando..."
