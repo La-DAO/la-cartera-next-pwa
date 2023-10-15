@@ -32,6 +32,16 @@ const Login = () => {
 
   const { login } = useLogin({
     onComplete: () => {
+      const embeddedWallet = wallets.find(
+        (wallet) => wallet.walletClientType === "privy"
+      );
+      console.log("wallet activa!!", activeWallet);
+      if (embeddedWallet) {
+        setActiveWallet(embeddedWallet)
+          .then((res) => console.log("SET ACTIVE WALLET!!!", res))
+          .catch((error) => console.error(error));
+      }
+      void activeWallet?.switchChain(80001);
       void push("/micuenta");
     },
     onError: (error) => {
@@ -62,7 +72,7 @@ const Login = () => {
         {!authenticated ? (
           <>
             <Heading as="h1" fontSize={["4xl"]} mt={[8, null, 0]}>
-              {t('start_session')}
+              {t("start_session")}
             </Heading>
             <Button
               size={["lg", null, null, "md"]}
@@ -70,17 +80,17 @@ const Login = () => {
               onClick={login}
               px={[null, null, 6, 8]}
             >
-              {t('login_button')}
+              {t("login_button")}
             </Button>
           </>
         ) : (
           <>
             <Heading as="h1" fontSize={["4xl"]}>
-            {t('my_keys')}
+              {t("my_keys")}
             </Heading>
             <Box px={4} textAlign="left" w="100%">
               <Heading as="h2" fontSize="2xl" mb={2}>
-                {t('active_key')}:
+                {t("active_key")}:
               </Heading>
               <Text fontSize="xl" fontWeight="medium" ml={2}>
                 {truncateAddress(activeWallet?.address, 12, 10)}
@@ -88,7 +98,7 @@ const Login = () => {
             </Box>
             <Box px={4} textAlign="left" w="100%">
               <Heading as="h2" fontSize="2xl" mb={4}>
-                {t('connected_keys')}
+                {t("connected_keys")}
               </Heading>
               <List>
                 {wallets.map((wallet) => (
@@ -107,7 +117,7 @@ const Login = () => {
                       <GridItem px={2}>
                         {wallet.address === activeWallet?.address ? (
                           <Button variant="outline" isDisabled={true} w="100%">
-                            {t('active_state')}
+                            {t("active_state")}
                           </Button>
                         ) : (
                           <Button
@@ -115,7 +125,7 @@ const Login = () => {
                             w="100%"
                             onClick={() => void setActiveWallet(wallet)}
                           >
-                            {t('activate_button')}
+                            {t("activate_button")}
                           </Button>
                         )}
                       </GridItem>
@@ -130,7 +140,7 @@ const Login = () => {
                 size="lg"
                 onClick={() => void logout()}
               >
-                {t('logout_button')}
+                {t("logout_button")}
               </Button>
             </Box>
           </>

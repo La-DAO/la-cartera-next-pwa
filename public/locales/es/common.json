@@ -11,6 +11,7 @@
   "warn_no_keys": "No hay llaves disponibles",
   "warn_no_active_key": "No hay llave activa",
   "create_key_button": "Crear llave",
+  "create_safeaccount_button": "Crear cuenta",
   "change_network_button": "Cambiar Red",
   "connected_keys": "Connected keys",
   "activate_button": "Activar",

@@ -11,6 +11,7 @@
   "warn_no_keys": "No available keys",
   "warn_no_active_key": "No active key",
   "create_key_button": "Create key",
+  "create_safeaccount_button": "Create Account",
   "change_network_button": "Change Network",
   "connected_keys": "Connected keys",
   "activate_button": "Activate",
