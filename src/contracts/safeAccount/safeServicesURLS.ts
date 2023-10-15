@@ -1,12 +1,7 @@
 /* https://docs.safe.global/safe-core-api/available-services */
-interface Dictionary {
-  [key: string]: {
-    name: string,
-    url: string
-  };
-}
+type SafeUrls = Record<string, Record<"name" | "url", string>>;
 
-export const SAFE_SERVICE_URLS:Dictionary = {
+export const SAFE_SERVICE_URLS: SafeUrls = {
   '100': {
     name: 'gnosis',
     url: 'https://safe-transaction-gnosis-chain.safe.global/'
