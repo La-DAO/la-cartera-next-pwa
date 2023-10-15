@@ -72,11 +72,6 @@ const MiCuenta = () => {
   };
 
   const handleCreateSafeAccount = async () => {
-    const passiveWallets = wallets
-      .map((w) => {
-        return w.address;
-      })
-      .filter((w) => w != walletClient?.account.address);
     setIsLoadingCreateWallet(true);
     try {
       await refetchWalletClient();
@@ -84,7 +79,7 @@ const MiCuenta = () => {
       const deployer = ethersSigner?.provider.getSigner();
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      await createUserPaidNewSafeAccount(deployer, passiveWallets);
+      await createUserPaidNewSafeAccount(deployer);
     } catch (error) {
       console.error(error);
     } finally {
