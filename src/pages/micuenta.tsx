@@ -26,6 +26,9 @@ import LoaderPage from "~/components/loader/LoaderPage";
 import { truncateAddress } from "~/utils/string";
 import { Link } from "@chakra-ui/next-js";
 
+import { getWalletClient } from '@wagmi/core'
+import { createUserPaidNewSafeAccount } from "../contracts/safeAccount/safeAccountUtils";
+
 const MiCuenta = () => {
   const { t } = useTranslation("common");
   const [isLoading, setIsLoading] = useState(false);
@@ -48,6 +51,27 @@ const MiCuenta = () => {
       console.error(error);
     } finally {
       setIsLoadingCreateWallet(false);
+    }
+  };
+
+  const handleCreateSafeAccount = async () => {
+    // let walletClient = await getWalletClient();
+    // const chainId = await walletClient?.getChainId();
+    // walletClient = await getWalletClient({chainId});
+
+    const passiveWallets = wallets.map(w => {
+      return w.address;
+    }).filter(w => w != walletClient?.account.address);
+    // setIsLoadingCreateWallet(true);
+    try {
+      console.log("embedded wallet", embeddedWallets[0]);
+      console.log("provider from embedded wallet", await embeddedWallets[0]?.getEthersProvider())
+      console.log("passiveWallets", passiveWallets);
+      // await createUserPaidNewSafeAccount(walletClient, passiveWallets);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // setIsLoadingCreateWallet(false);
     }
   };
 
@@ -246,6 +270,18 @@ const MiCuenta = () => {
                   spinnerPlacement="end"
                 >
                   {t('logout_button')}
+                </Button>
+              </Box>
+              <Box mt={4}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={handleCreateSafeAccount}
+                  isLoading={isLoading}
+                  loadingText={t('loader_msg_closing')}
+                  spinnerPlacement="end"
+                >
+                  {t('create_safeaccount_button')}
                 </Button>
               </Box>
             </>
