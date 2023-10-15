@@ -71,22 +71,12 @@ export async function createSponsoredNewSafeAccount() {
 }
 
 export async function createUserPaidNewSafeAccount(
-  // walletClient: WalletClient,
-  deployer: unknown,
-  otherKeys?: string[]
+  deployer: ethers.providers.JsonRpcSigner
 ): Promise<string> {
-  if (!deployer) {
-    console.error("no deployer detected :(");
-    return "No Signer to set as deployer";
-  }
   const ethAdapter = getSafeEthersAdapter(deployer);
   const safeFactory = await SafeFactory.create({ ethAdapter: ethAdapter });
-  let safeOwners: string[];
-  if (otherKeys) {
-    safeOwners = [await deployer.getAddress(), ...otherKeys];
-  } else {
-    safeOwners = [await deployer.getAddress()];
-  }
+
+  const safeOwners: string[] = [await deployer.getAddress()];
 
   const safeAccountConfig: SafeAccountConfig = {
     owners: safeOwners,
