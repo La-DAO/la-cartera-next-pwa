@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation, withTranslation } from "next-i18next";
 import nextI18nConfig from "../../next-i18next.config.mjs";
+import { privyWagmiWalletToSigner } from "../contracts/wagmiAdapters";
 
 import {
   Box,
