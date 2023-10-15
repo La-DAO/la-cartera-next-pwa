@@ -70,6 +70,12 @@ export async function createSponsoredNewSafeAccount() {
   // TODO
 }
 
+/**
+ * Utilizes the Safe SDK to deploy a new Safe with user or `deployer` 
+ * being the signer and requiring it to pay the gas for the deployment.
+ * @param deployer ethers.provider.JsonRpcSigner
+ * @returns Address of the newly deployed Safe Account
+ */
 export async function createUserPaidNewSafeAccount(
   deployer: ethers.providers.JsonRpcSigner
 ): Promise<string> {
