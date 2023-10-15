@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -15,17 +14,6 @@ import { type SafeTransactionDataPartial } from "@safe-global/safe-core-sdk-type
 import { SAFE_SERVICE_URLS } from "./safeServicesURLS";
 import { walletClientToSigner } from "../wagmiAdapters";
 import { type WalletClient } from "@wagmi/core";
-=======
-import { ethers } from 'ethers';
-import { EthersAdapter, SafeFactory, type SafeAccountConfig } from '@safe-global/protocol-kit';
-import Safe from '@safe-global/protocol-kit';
-import SafeApiKit from '@safe-global/api-kit';
-import { type SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
-import { SAFE_SERVICE_URLS } from './safeServicesURLS';
-import { walletClientToSigner, privyWagmiWalletToSigner } from '../wagmiAdapters';
-import { type ConnectedWallet } from '@privy-io/react-auth';
-import { type WalletClient } from '@wagmi/core'
->>>>>>> Stashed changes
 
 /**
  * Initiating a transaction for a Safe
@@ -89,7 +77,6 @@ export async function createSponsoredNewSafeAccount() {
  * @returns Address of the newly deployed Safe Account
  */
 export async function createUserPaidNewSafeAccount(
-<<<<<<< Updated upstream
   deployer: ethers.providers.JsonRpcSigner
 ): Promise<string> {
   const ethAdapter = getSafeEthersAdapter(deployer);
@@ -97,38 +84,12 @@ export async function createUserPaidNewSafeAccount(
 
   const safeOwners: string[] = [await deployer.getAddress()];
 
-=======
-  privyWallet: ConnectedWallet,
-  otherKeys?: string[]
-): Promise<string> {
-  const deployer = await privyWagmiWalletToSigner(privyWallet);
-  const ethAdapter = getSafeEthersAdapter(deployer);
-  const safeFactory = await SafeFactory.create({ ethAdapter: ethAdapter });
-  let safeOwners: string[];
-  if (otherKeys) {
-    safeOwners = [
-      await deployer.getAddress(),
-      ...otherKeys
-    ];
-  } else {
-    safeOwners = [
-      await deployer.getAddress()
-    ];
-  }
-  console.log("safeOnwers", safeOwners);
->>>>>>> Stashed changes
   const safeAccountConfig: SafeAccountConfig = {
     owners: safeOwners,
     threshold: safeOwners.length,
     // ... (Optional params)
-<<<<<<< Updated upstream
   };
   const newSafeAccount = await safeFactory.deploySafe({ safeAccountConfig });
-=======
-  }
-  const newSafeAccount = await safeFactory.deploySafe({ safeAccountConfig })
-  console.log('here')
->>>>>>> Stashed changes
   const safeAddress = await newSafeAccount.getAddress();
   return safeAddress;
 }
