@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ethers } from "ethers";
 import {
   EthersAdapter,
@@ -12,8 +8,6 @@ import Safe from "@safe-global/protocol-kit";
 import SafeApiKit from "@safe-global/api-kit";
 import { type SafeTransactionDataPartial } from "@safe-global/safe-core-sdk-types";
 import { SAFE_SERVICE_URLS } from "./safeServicesURLS";
-import { walletClientToSigner } from "../wagmiAdapters";
-import { type WalletClient } from "@wagmi/core";
 
 /**
  * Initiating a transaction for a Safe
@@ -21,18 +15,17 @@ import { type WalletClient } from "@wagmi/core";
  * https://docs.safe.global/safe-core-aa-sdk/protocol-kit#making-a-transaction-from-a-safe
  */
 export async function initiateSafeTx(
-  walletClient: WalletClient,
+  originator: ethers.providers.JsonRpcSigner,
   safeAddr: string,
   toDestination: string,
   valueIntegerAmount: string,
   contractCallData: string
 ) {
-  const txCreator = walletClientToSigner(walletClient);
-  const chainId = await getChainIdFromSigner(txCreator);
+  const chainId = await getChainIdFromSigner(originator);
   if (!SAFE_SERVICE_URLS[chainId])
     throw `No defined Safe Service URL for chainId ${chainId}`;
   const txServiceUrl: string = SAFE_SERVICE_URLS[chainId]!.url;
-  const ethAdapter = getSafeEthersAdapter(txCreator);
+  const ethAdapter = getSafeEthersAdapter(originator);
   const safeService = new SafeApiKit({ txServiceUrl, ethAdapter: ethAdapter });
 
   // Create Safe instance
@@ -48,7 +41,7 @@ export async function initiateSafeTx(
   };
 
   const safeTransaction = await safe.createTransaction({ safeTransactionData });
-  const senderAddress = await txCreator.getAddress();
+  const senderAddress = await originator.getAddress();
   const safeTxHash = await safe.getTransactionHash(safeTransaction);
   const signature = await safe.signTransactionHash(safeTxHash);
 

@@ -30,7 +30,7 @@ import { Link } from "@chakra-ui/next-js";
 import { useWalletClient } from "wagmi";
 import { createUserPaidNewSafeAccount } from "../contracts/safeAccount/safeAccountUtils";
 
-const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "80001");
+const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
 const MiCuenta = () => {
   const { t } = useTranslation("common");
@@ -47,19 +47,6 @@ const MiCuenta = () => {
       wallet.connectorType === "embedded" && wallet.walletClientType === "privy"
   );
 
-  const getEthersSigner = async () => {
-    if (!activeWallet) return;
-
-    // Switch the wallet to your target chain before getting the ethers provider
-    // TODO check if current chain === App Chain Id
-    await activeWallet?.switchChain(appChainId);
-
-    // Get an ethers provider and signer from the user's recently connected wallet
-    const provider = await activeWallet?.getEthersProvider();
-
-    return provider?.getSigner();
-  };
-
   const handleCreateKey = async () => {
     setIsLoadingCreateWallet(true);
     try {
@@ -75,11 +62,11 @@ const MiCuenta = () => {
     setIsLoadingCreateWallet(true);
     try {
       await refetchWalletClient();
-      const ethersSigner = await getEthersSigner();
-      const deployer = ethersSigner?.provider.getSigner();
+      if (!activeWallet) return;
+      const ethersSigner = await privyWagmiWalletToSigner(activeWallet, appChainId);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      await createUserPaidNewSafeAccount(deployer);
+      await createUserPaidNewSafeAccount(ethersSigner);
     } catch (error) {
       console.error(error);
     } finally {

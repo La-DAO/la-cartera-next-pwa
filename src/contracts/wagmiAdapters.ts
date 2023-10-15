@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { type PublicClient, getPublicClient } from "@wagmi/core";
 import { type WalletClient } from "@wagmi/core";
 import { providers } from "ethers";
@@ -50,9 +46,13 @@ export function walletClientToSigner(walletClient: WalletClient) {
   return signer;
 }
 
-export async function privyWagmiWalletToSigner(privyWallet: ConnectedWallet) {
-  const provider = await privyWallet.getEthersProvider()
-  return provider.getSigner(privyWallet.address)
+export async function privyWagmiWalletToSigner(
+  privyWallet: ConnectedWallet,
+  appChainId: number | `0x${string}`
+) {
+  await privyWallet?.switchChain(appChainId);
+  const provider = await privyWallet.getEthersProvider();
+  return provider.getSigner()
 }
 
 /**
