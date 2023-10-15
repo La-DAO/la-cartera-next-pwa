@@ -26,8 +26,10 @@ import LoaderPage from "~/components/loader/LoaderPage";
 import { truncateAddress } from "~/utils/string";
 import { Link } from "@chakra-ui/next-js";
 
-import { getWalletClient } from '@wagmi/core'
+import { useWalletClient } from "wagmi";
 import { createUserPaidNewSafeAccount } from "../contracts/safeAccount/safeAccountUtils";
+
+const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "80001");
 
 const MiCuenta = () => {
   const { t } = useTranslation("common");
@@ -37,11 +39,26 @@ const MiCuenta = () => {
   const { ready, authenticated, logout, createWallet } = usePrivy();
   const { wallets } = useWallets();
   const { wallet: activeWallet, setActiveWallet } = usePrivyWagmi();
+  const { data: walletClient, refetch: refetchWalletClient } =
+    useWalletClient();
 
   const embeddedWallets = wallets.filter(
     (wallet) =>
       wallet.connectorType === "embedded" && wallet.walletClientType === "privy"
   );
+
+  const getEthersSigner = async () => {
+    if (!activeWallet) return;
+
+    // Switch the wallet to your target chain before getting the ethers provider
+    // TODO check if current chain === App Chain Id
+    await activeWallet?.switchChain(appChainId);
+
+    // Get an ethers provider and signer from the user's recently connected wallet
+    const provider = await activeWallet?.getEthersProvider();
+
+    return provider?.getSigner();
+  };
 
   const handleCreateWallet = async () => {
     setIsLoadingCreateWallet(true);
@@ -55,23 +72,23 @@ const MiCuenta = () => {
   };
 
   const handleCreateSafeAccount = async () => {
-    // let walletClient = await getWalletClient();
-    // const chainId = await walletClient?.getChainId();
-    // walletClient = await getWalletClient({chainId});
-
-    const passiveWallets = wallets.map(w => {
-      return w.address;
-    }).filter(w => w != walletClient?.account.address);
-    // setIsLoadingCreateWallet(true);
+    const passiveWallets = wallets
+      .map((w) => {
+        return w.address;
+      })
+      .filter((w) => w != walletClient?.account.address);
+    setIsLoadingCreateWallet(true);
     try {
-      console.log("embedded wallet", embeddedWallets[0]);
-      console.log("provider from embedded wallet", await embeddedWallets[0]?.getEthersProvider())
-      console.log("passiveWallets", passiveWallets);
-      // await createUserPaidNewSafeAccount(walletClient, passiveWallets);
+      await refetchWalletClient();
+      const ethersSigner = await getEthersSigner();
+      const deployer = ethersSigner?.provider.getSigner();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      await createUserPaidNewSafeAccount(deployer, passiveWallets);
     } catch (error) {
       console.error(error);
     } finally {
-      // setIsLoadingCreateWallet(false);
+      setIsLoadingCreateWallet(false);
     }
   };
 
@@ -100,7 +117,11 @@ const MiCuenta = () => {
     if (ready && !authenticated) {
       void push("/ingresar");
     }
-  });
+    if (ready) {
+      void activeWallet?.switchChain(appChainId);
+      void refetchWalletClient();
+    }
+  }, [activeWallet, authenticated, push, ready, refetchWalletClient]);
 
   if (!ready)
     return (
@@ -126,11 +147,11 @@ const MiCuenta = () => {
           {authenticated ? (
             <>
               <Heading as="h1" fontSize={["4xl"]}>
-                {t('my_keys')}
+                {t("my_keys")}
               </Heading>
               <Box px={4} textAlign="left" w="100%">
                 <Heading as="h2" fontSize="2xl" mb={2}>
-                  {t('active_key')}:
+                  {t("active_key")}:
                 </Heading>
                 <Flex
                   display="flex"
@@ -146,7 +167,7 @@ const MiCuenta = () => {
                   >
                     {activeWallet
                       ? truncateAddress(activeWallet.address, 12, 10)
-                      : t('warn_no_active_key')}
+                      : t("warn_no_active_key")}
                   </Text>
                   <Text
                     display={["none", null, null, null, "block"]}
@@ -157,7 +178,7 @@ const MiCuenta = () => {
                   >
                     {activeWallet
                       ? activeWallet.address
-                      : t('warn_no_active_key')}
+                      : t("warn_no_active_key")}
                   </Text>
                   {activeWallet && (
                     <Link
@@ -179,18 +200,18 @@ const MiCuenta = () => {
                       size="lg"
                       onClick={handleSwitchNetwork}
                     >
-                      {t('change_network_button')}
+                      {t("change_network_button")}
                     </Button>
                   </Flex>
                 )}
               </Box>
               <Box px={4} textAlign="left" w="100%">
                 <Heading as="h2" fontSize="2xl" mb={4}>
-                  {t('available_keys')}
+                  {t("available_keys")}
                 </Heading>
                 {wallets.length === 0 ? (
                   <Text fontSize="xl" ml={2}>
-                    {t('warn_no_keys')}
+                    {t("warn_no_keys")}
                   </Text>
                 ) : (
                   <List>
@@ -227,7 +248,7 @@ const MiCuenta = () => {
                                 isDisabled={true}
                                 w="100%"
                               >
-                                {t('active_state')}
+                                {t("active_state")}
                               </Button>
                             ) : (
                               <Button
@@ -235,7 +256,7 @@ const MiCuenta = () => {
                                 w="100%"
                                 onClick={() => void setActiveWallet(wallet)}
                               >
-                                {t('activate_button')}
+                                {t("activate_button")}
                               </Button>
                             )}
                           </GridItem>
@@ -255,7 +276,7 @@ const MiCuenta = () => {
                       loadingText="Creando..."
                       spinnerPlacement="end"
                     >
-                      {t('create_key_button')}
+                      {t("create_key_button")}
                     </Button>
                   </Flex>
                 )}
@@ -266,10 +287,10 @@ const MiCuenta = () => {
                   size="lg"
                   onClick={handleLogout}
                   isLoading={isLoading}
-                  loadingText={t('loader_msg_closing')}
+                  loadingText={t("loader_msg_closing")}
                   spinnerPlacement="end"
                 >
-                  {t('logout_button')}
+                  {t("logout_button")}
                 </Button>
               </Box>
               <Box mt={4}>
@@ -278,15 +299,15 @@ const MiCuenta = () => {
                   size="lg"
                   onClick={handleCreateSafeAccount}
                   isLoading={isLoading}
-                  loadingText={t('loader_msg_closing')}
+                  loadingText={t("loader_msg_closing")}
                   spinnerPlacement="end"
                 >
-                  {t('create_safeaccount_button')}
+                  {t("create_safeaccount_button")}
                 </Button>
               </Box>
             </>
           ) : (
-            <LoaderPage text={t('loader_msg_redirecting')} />
+            <LoaderPage text={t("loader_msg_redirecting")} />
           )}
         </Flex>
       </Flex>
