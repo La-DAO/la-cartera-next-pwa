@@ -16,7 +16,8 @@ export function publicClientToProvider(publicClient: PublicClient) {
         ({ value }) => new providers.JsonRpcProvider(value?.url, network),
       ),
     )
-  return new providers.JsonRpcProvider(transport.url, network)
+  const transport_:string = transport.url as string;
+  return new providers.JsonRpcProvider(transport_, network)
 }
 
 /** Action to convert a viem Public Client to an ethers.js Provider. */
@@ -25,6 +26,11 @@ export function getEthersProvider({ chainId }: { chainId?: number } = {}) {
   return publicClientToProvider(publicClient)
 }
 
+/**
+ * Convert passed wagmi `walletClient` to `ethers.provider.JsonRpcSigner`
+ * @param walletClient from wagmi
+ * @returns An ethers.provider.JsonRpcSigner
+ */
 export function walletClientToSigner(walletClient: WalletClient) {
   const { account, chain, transport } = walletClient
   const network = {
@@ -36,8 +42,12 @@ export function walletClientToSigner(walletClient: WalletClient) {
   const signer = provider.getSigner(account.address)
   return signer
 }
- 
-/** Action to convert a viem Wallet Client to an ethers.js Signer. */
+
+/**
+ * Convert injected viem `WalletClient` to an `ethers.provider.JsonRpcSigner`
+ * @param param0 {ChainId}
+ * @returns ethers.provider.JsonRpcSigner
+ */
 export async function getEthersSigner({ chainId }: { chainId?: number } = {}) {
   const walletClient = await getWalletClient({ chainId })
   if (!walletClient) return undefined
