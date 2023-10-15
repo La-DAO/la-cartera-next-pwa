@@ -39,8 +39,7 @@ const MiCuenta = () => {
   const { ready, authenticated, logout, createWallet } = usePrivy();
   const { wallets } = useWallets();
   const { wallet: activeWallet, setActiveWallet } = usePrivyWagmi();
-  const { data: walletClient, refetch: refetchWalletClient } =
-    useWalletClient();
+  const { refetch: refetchWalletClient } = useWalletClient();
 
   const embeddedWallets = wallets.filter(
     (wallet) =>
