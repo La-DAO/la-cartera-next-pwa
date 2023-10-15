@@ -1,7 +1,8 @@
-import { type PublicClient, getPublicClient } from '@wagmi/core'
-import { type WalletClient, getWalletClient } from '@wagmi/core'
-import { providers } from 'ethers'
-import { type HttpTransport } from 'viem'
+import { type PublicClient, getPublicClient } from '@wagmi/core';
+import { type WalletClient, getWalletClient } from '@wagmi/core';
+import { providers } from 'ethers';
+import { type HttpTransport } from 'viem';
+import { type ConnectedWallet } from '@privy-io/react-auth';
 
 export function publicClientToProvider(publicClient: PublicClient) {
   const { chain, transport } = publicClient
@@ -32,7 +33,11 @@ export function getEthersProvider({ chainId }: { chainId?: number } = {}) {
  * @returns An ethers.provider.JsonRpcSigner
  */
 export function walletClientToSigner(walletClient: WalletClient) {
-  const { account, chain, transport } = walletClient
+  const { account, chain, transport } = walletClient;
+  console.log("walletClient__",walletClient);
+  console.log("chain",chain);
+
+  // const chainId = await walletClient.getChainId()
   const network = {
     chainId: chain.id,
     name: chain.name,
@@ -41,6 +46,10 @@ export function walletClientToSigner(walletClient: WalletClient) {
   const provider = new providers.Web3Provider(transport, network)
   const signer = provider.getSigner(account.address)
   return signer
+}
+
+export function privyWagmiWalletToSigner(privy:ConnectedWallet) {
+
 }
 
 /**
