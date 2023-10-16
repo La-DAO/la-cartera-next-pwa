@@ -6,11 +6,13 @@ import {
 } from "@safe-global/protocol-kit";
 import Safe from "@safe-global/protocol-kit";
 import SafeApiKit from "@safe-global/api-kit";
-import { type SafeTransactionDataPartial } from "@safe-global/safe-core-sdk-types";
+import { 
+  type SafeTransactionDataPartial,
+  type SafeMultisigTransactionResponse } from "@safe-global/safe-core-sdk-types";
 import { SAFE_SERVICE_URLS } from "./safeServicesURLS";
 
 /**
- * Initiating a transaction for a Safe
+ * Initiating a transaction for a Safe using the Safe API service for storage
  * REFERENCES:
  * https://docs.safe.global/safe-core-aa-sdk/protocol-kit#making-a-transaction-from-a-safe
  */
@@ -21,12 +23,8 @@ export async function initiateSafeTx(
   valueIntegerAmount: string,
   contractCallData: string
 ) {
-  const chainId = await getChainIdFromSigner(originator);
-  if (!SAFE_SERVICE_URLS[chainId])
-    throw `No defined Safe Service URL for chainId ${chainId}`;
-  const txServiceUrl: string = SAFE_SERVICE_URLS[chainId]!.url;
   const ethAdapter = getSafeEthersAdapter(originator);
-  const safeService = new SafeApiKit({ txServiceUrl, ethAdapter: ethAdapter });
+  const safeApiService = await buildsafeApiService(originator);
 
   // Create Safe instance
   const safe = await Safe.create({
@@ -46,13 +44,30 @@ export async function initiateSafeTx(
   const signature = await safe.signTransactionHash(safeTxHash);
 
   // Propose transaction to the service
-  await safeService.proposeTransaction({
+  await safeApiService.proposeTransaction({
     safeAddress: await safe.getAddress(),
     safeTransactionData: safeTransaction.data,
     safeTxHash,
     senderAddress,
     senderSignature: signature.data,
   });
+}
+
+export async function getUserAssociatedSafeAccounts(
+  user: ethers.providers.JsonRpcSigner
+): Promise<string[]> {
+  const safeApiService = await buildsafeApiService(user);
+  const response = await safeApiService.getSafesByOwner(await user.getAddress());
+  return response.safes;
+}
+
+export async function getUserPendingSafeTxs(
+  user: ethers.providers.JsonRpcSigner,
+  safeAddress: string
+): Promise<SafeMultisigTransactionResponse[]> {
+  const safeApiService = await buildsafeApiService(user);
+  const response = await safeApiService.getPendingTransactions(safeAddress);
+  return response.results;
 }
 
 export function computeNewSafeAddress() {
@@ -85,6 +100,15 @@ export async function createUserPaidNewSafeAccount(
   const newSafeAccount = await safeFactory.deploySafe({ safeAccountConfig });
   const safeAddress = await newSafeAccount.getAddress();
   return safeAddress;
+}
+
+async function buildsafeApiService(etherSigner: ethers.providers.JsonRpcSigner): Promise<SafeApiKit> {
+  const chainId = await getChainIdFromSigner(etherSigner);
+  if (!SAFE_SERVICE_URLS[chainId])
+    throw `No defined Safe Service URL for chainId ${chainId}`;
+  const txServiceUrl: string = SAFE_SERVICE_URLS[chainId]!.url;
+  const ethAdapter = getSafeEthersAdapter(etherSigner);
+  return new SafeApiKit({ txServiceUrl, ethAdapter: ethAdapter });
 }
 
 function getSafeEthersAdapter(etherSigner: ethers.providers.JsonRpcSigner) {
