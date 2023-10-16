@@ -68,6 +68,18 @@ const theme = extendTheme({
           color: "ldWhiteNeutral",
           _hover: {
             bg: "ldOrange.700",
+            backgroundColor: "ldOrange.700",
+          },
+          _disabled: {
+            bg: "primary",
+            backgroundColor: "primary",
+            boxShadow: "inset 0 0 0 2px #f25b3d",
+          },
+          _active: {
+            backgroundColor: "primary",
+          },
+          _focus: {
+            backgroundColor: "primary",
           },
         },
         secondary: {
@@ -155,6 +167,31 @@ theme.styles.global = (
     },
   },
   h1: { color: "primary" },
+
+  input: {
+    baseStyle: {
+      focusBorderColor: "primary",
+      borderWidth: "1.5px",
+      borderColor: "green",
+      borderRadius: "lg",
+      border: "1.5px",
+    },
+    variants: {
+      outline: {
+        bg: "red",
+        color: "primary",
+        fontWeight: "semibold",
+        _disabled: {
+          bg: "ldBlackNight",
+          boxShadow: "inset 0 0 0 2px #f25b3d",
+          color: "primary",
+        },
+        _hover: {
+          bg: "ldBlackJet.700",
+        },
+      },
+    },
+  },
   nav: {
     backgroundColor: mode("ldBlackNight", "ldBlackNight")(props),
   },

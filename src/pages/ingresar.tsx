@@ -33,7 +33,7 @@ const Login = () => {
   const { wallet: activeWallet, setActiveWallet } = usePrivyWagmi();
 
   const { login } = useLogin({
-    onComplete: () => {
+    onComplete: (user, isNewUser) => {
       const embeddedWallet = wallets.find(
         (wallet) => wallet.walletClientType === "privy"
       );
@@ -44,7 +44,10 @@ const Login = () => {
           .catch((error) => console.error(error));
       }
       void activeWallet?.switchChain(appChainId);
-      void push("/micuenta");
+      if (isNewUser) {
+        void push(`/u/${user.id.replace("did:privy:", "")}`);
+      }
+      void push(`/u/${user.id.replace("did:privy:", "")}`);
     },
     onError: (error) => {
       console.error(error);
