@@ -30,7 +30,7 @@ import { Link } from "@chakra-ui/next-js";
 import { useWalletClient } from "wagmi";
 import {
   createUserPaidNewSafeAccount,
-  getUserAssociatedSafeAccounts
+  getUserAssociatedSafeAccounts,
 } from "../contracts/safeAccount/safeAccountUtils";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
@@ -39,6 +39,8 @@ const MiCuenta = () => {
   const { t } = useTranslation("common");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [safes, setSafes] = useState<unknown>(null);
   const { push } = useRouter();
   const { ready, authenticated, logout, createWallet } = usePrivy();
   const { wallets } = useWallets();
@@ -50,12 +52,25 @@ const MiCuenta = () => {
       wallet.connectorType === "embedded" && wallet.walletClientType === "privy"
   );
 
-  const buildListOfUserSafes = async () => {
-    if (!activeWallet) return;
-    const ethersSigner = await privyWagmiWalletToSigner(activeWallet, appChainId);
-    const safes = await getUserAssociatedSafeAccounts(ethersSigner);
-    return safes;
-  }
+  useEffect(() => {
+    const buildListOfUserSafes = async () => {
+      if (!activeWallet) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      const safes = await getUserAssociatedSafeAccounts(ethersSigner);
+      setSafes(safes);
+    };
+
+    if (!isMounted) {
+      void buildListOfUserSafes();
+    }
+  }, [activeWallet, isMounted]);
+
+  useEffect(() => {
+    console.log(safes);
+  });
 
   const UNA_SAFE = activeWallet?.address;
 
@@ -75,7 +90,10 @@ const MiCuenta = () => {
     try {
       await refetchWalletClient();
       if (!activeWallet) return;
-      const ethersSigner = await privyWagmiWalletToSigner(activeWallet, appChainId);
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await createUserPaidNewSafeAccount(ethersSigner);
@@ -101,7 +119,7 @@ const MiCuenta = () => {
   const handleSwitchNetwork = async () => {
     if (!activeWallet) return;
     try {
-      await activeWallet.switchChain(80001);
+      await activeWallet.switchChain(137);
     } catch (error) {
       console.error(error);
     }
@@ -334,12 +352,7 @@ const MiCuenta = () => {
                       justifyContent="right"
                       colSpan={1}
                     >
-
-                      <Text
-                        fontSize="xl"
-                        fontWeight="medium"
-                        ml={2}
-                      >
+                      <Text fontSize="xl" fontWeight="medium" ml={2}>
                         {`Xoc Balance: 12556`}
                       </Text>
                     </GridItem>
