@@ -28,7 +28,10 @@ import { truncateAddress } from "~/utils/string";
 import { Link } from "@chakra-ui/next-js";
 
 import { useWalletClient } from "wagmi";
-import { createUserPaidNewSafeAccount } from "../contracts/safeAccount/safeAccountUtils";
+import {
+  createUserPaidNewSafeAccount,
+  getUserAssociatedSafeAccounts
+} from "../contracts/safeAccount/safeAccountUtils";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
@@ -46,6 +49,15 @@ const MiCuenta = () => {
     (wallet) =>
       wallet.connectorType === "embedded" && wallet.walletClientType === "privy"
   );
+
+  const buildListOfUserSafes = async () => {
+    if (!activeWallet) return;
+    const ethersSigner = await privyWagmiWalletToSigner(activeWallet, appChainId);
+    const safes = await getUserAssociatedSafeAccounts(ethersSigner);
+    return safes;
+  }
+
+  const UNA_SAFE = activeWallet?.address;
 
   const handleCreateKey = async () => {
     setIsLoadingCreateWallet(true);
@@ -175,7 +187,7 @@ const MiCuenta = () => {
                     </Link>
                   )}
                 </Flex>
-                {activeWallet?.chainId !== "eip155:80001" && (
+                {activeWallet?.chainId !== "eip155:137" && (
                   <Flex justifyContent="center" mt={4} w="100%">
                     <Button
                       variant="outline"
@@ -287,6 +299,53 @@ const MiCuenta = () => {
                   {t("create_safeaccount_button")}
                 </Button>
               </Box>
+              <Heading as="h1" fontSize={["4xl"]}>
+                {t("my_safe_accounts")}
+              </Heading>
+              <List>
+                <ListItem key={UNA_SAFE}>
+                  <Grid templateColumns="repeat(3, 1fr)">
+                    <GridItem
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="left"
+                      colSpan={2}
+                    >
+                      <Text
+                        display={["block", null, null, null, "none"]}
+                        fontSize="xl"
+                        fontWeight="medium"
+                        ml={2}
+                      >
+                        {truncateAddress(UNA_SAFE, 6, 6)}
+                      </Text>
+                      <Text
+                        display={["none", null, null, null, "block"]}
+                        fontSize="xl"
+                        fontWeight="medium"
+                        ml={2}
+                      >
+                        {truncateAddress(UNA_SAFE, 14, 12)}
+                      </Text>
+                    </GridItem>
+                    <GridItem
+                      display="flex"
+                      alignItems="right"
+                      justifyContent="right"
+                      colSpan={1}
+                    >
+
+                      <Text
+                        fontSize="xl"
+                        fontWeight="medium"
+                        ml={2}
+                      >
+                        {`Xoc Balance: 12556`}
+                      </Text>
+                    </GridItem>
+                  </Grid>
+                </ListItem>
+              </List>
             </>
           ) : (
             <LoaderPage text={t("loader_msg_redirecting")} />
