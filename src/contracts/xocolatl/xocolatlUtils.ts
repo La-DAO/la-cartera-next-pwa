@@ -112,17 +112,16 @@ async function callContractMethod(
   methodName: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: any[] = []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any | null> {
+): Promise<ethers.BigNumberish | Transaction | null> {
   try {
     // Make the read call to the contract
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await contract[methodName](...params) as any;
-    // eslink-disable-next-line @typescript-eslint/no-unsafe-return
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const result = await contract[methodName](...params) as ethers.BigNumberish | Transaction;
     return result;
-  } catch (error) {
-    console.error(`Error calling contract method ${methodName}: ${error}`);
-    // You can handle the error here, throw it, or return an error object if needed.
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error(`Error calling contract method ${methodName}: ${err.message}`); 
+    }
     return null;
   }
 }
