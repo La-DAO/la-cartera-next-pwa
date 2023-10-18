@@ -58,7 +58,6 @@ export async function getUserAssociatedSafeAccounts(
 ): Promise<string[]> {
   const safeApiService = await buildsafeApiService(user);
   const response = await safeApiService.getSafesByOwner(await user.getAddress());
-  console.log('getUserAssociatedSafeAccounts', response)
   return response.safes;
 }
 
