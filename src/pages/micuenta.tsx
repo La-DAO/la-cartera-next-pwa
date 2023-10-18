@@ -32,6 +32,7 @@ import {
   createUserPaidNewSafeAccount,
   getUserAssociatedSafeAccounts,
 } from "../contracts/safeAccount/safeAccountUtils";
+import { type BalanceMap, readXocBalance } from "~/contracts/xocolatl/xocolatlUtils";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
@@ -41,6 +42,8 @@ const MiCuenta = () => {
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
   const [isMounted] = useState(false);
   const [safes, setSafes] = useState<string[]>([]);
+  const [xocBalance, setXocBalance] = useState<BalanceMap>({});
+
   const { push } = useRouter();
   const { ready, authenticated, logout, createWallet } = usePrivy();
   const { wallets } = useWallets();
@@ -69,8 +72,28 @@ const MiCuenta = () => {
   }, [activeWallet, isMounted]);
 
   useEffect(() => {
-    console.log(safes);
-  });
+    const getXocBalances = async () => {
+      if (!activeWallet || !safes || safes.length === 0) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      const balances: BalanceMap = {}
+      for (const safe of safes) {
+        console.log('safe', safes);
+        const bal = await readXocBalance(safe, ethersSigner.provider);
+        console.log('bal del safe', bal);
+        if (bal != null) {
+          balances[safe] = bal;
+        }
+      }
+      setXocBalance(balances)
+    }
+
+    if (!isMounted) {
+      void getXocBalances();
+    }
+  }, [activeWallet, isMounted, safes]);
 
   const handleCreateKey = async () => {
     setIsLoadingCreateWallet(true);
@@ -353,7 +376,7 @@ const MiCuenta = () => {
                           colSpan={1}
                         >
                           <Text fontSize="xl" fontWeight="medium" ml={2}>
-                            {`Xoc Balance: 12556`}
+                            {`Xoc Balance: ${xocBalance[safe] as string}`}
                           </Text>
                         </GridItem>
                       </Grid>
