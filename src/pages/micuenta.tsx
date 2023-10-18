@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useRouter } from "next/router";
+import { isAddress } from "viem";
 
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation, withTranslation } from "next-i18next";
@@ -28,7 +29,11 @@ import { truncateAddress } from "~/utils/string";
 import { Link } from "@chakra-ui/next-js";
 
 import { useWalletClient } from "wagmi";
-import { createUserPaidNewSafeAccount } from "../contracts/safeAccount/safeAccountUtils";
+import {
+  createUserPaidNewSafeAccount,
+  getUserAssociatedSafeAccounts,
+} from "../contracts/safeAccount/safeAccountUtils";
+import { type BalanceMap, readXocBalance, sendGaslessXoc } from "~/contracts/xocolatl/xocolatlUtils";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
@@ -36,6 +41,10 @@ const MiCuenta = () => {
   const { t } = useTranslation("common");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
+  const [isMounted] = useState(false);
+  const [safes, setSafes] = useState<string[]>([]);
+  const [xocBalance, setXocBalance] = useState<BalanceMap>({});
+
   const { push } = useRouter();
   const { ready, authenticated, logout, createWallet } = usePrivy();
   const { wallets } = useWallets();
@@ -46,6 +55,46 @@ const MiCuenta = () => {
     (wallet) =>
       wallet.connectorType === "embedded" && wallet.walletClientType === "privy"
   );
+
+  useEffect(() => {
+    const buildListOfUserSafes = async () => {
+      if (!activeWallet) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      const safes = await getUserAssociatedSafeAccounts(ethersSigner);
+      setSafes(safes);
+    };
+
+    if (!isMounted) {
+      void buildListOfUserSafes();
+    }
+  }, [activeWallet, isMounted]);
+
+  useEffect(() => {
+    const getXocBalances = async () => {
+      if (!activeWallet || !safes || safes.length === 0) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      const balances: BalanceMap = {}
+      for (const safe of safes) {
+        console.log('safe', safes);
+        const bal = await readXocBalance(safe, ethersSigner.provider);
+        console.log('bal del safe', bal);
+        if (bal != null) {
+          balances[safe] = bal;
+        }
+      }
+      setXocBalance(balances)
+    }
+
+    if (!isMounted) {
+      void getXocBalances();
+    }
+  }, [activeWallet, isMounted, safes]);
 
   const handleCreateKey = async () => {
     setIsLoadingCreateWallet(true);
@@ -63,7 +112,10 @@ const MiCuenta = () => {
     try {
       await refetchWalletClient();
       if (!activeWallet) return;
-      const ethersSigner = await privyWagmiWalletToSigner(activeWallet, appChainId);
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await createUserPaidNewSafeAccount(ethersSigner);
@@ -73,6 +125,30 @@ const MiCuenta = () => {
       setIsLoadingCreateWallet(false);
     }
   };
+
+  const handleGaslessSendXoc = async () => {
+    if (!safes || safes.length === 0) throw "This wallet owns no Safe"
+    const userReceiverInput = prompt("Please enter an address:")!;
+    if (!isAddress(userReceiverInput)) throw "Enter valid address";
+    const amountInput = prompt("Please amount to send:")!;
+    console.log("happy", userReceiverInput, amountInput);
+    try {
+      await refetchWalletClient();
+      if (!activeWallet) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      await sendGaslessXoc(
+        ethersSigner,
+        safes[0]!,
+        userReceiverInput,
+        amountInput
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -89,7 +165,7 @@ const MiCuenta = () => {
   const handleSwitchNetwork = async () => {
     if (!activeWallet) return;
     try {
-      await activeWallet.switchChain(80001);
+      await activeWallet.switchChain(137);
     } catch (error) {
       console.error(error);
     }
@@ -175,7 +251,7 @@ const MiCuenta = () => {
                     </Link>
                   )}
                 </Flex>
-                {activeWallet?.chainId !== "eip155:80001" && (
+                {activeWallet?.chainId !== "eip155:137" && (
                   <Flex justifyContent="center" mt={4} w="100%">
                     <Button
                       variant="outline"
@@ -285,6 +361,65 @@ const MiCuenta = () => {
                   spinnerPlacement="end"
                 >
                   {t("create_safeaccount_button")}
+                </Button>
+              </Box>
+              <Heading as="h1" fontSize={["4xl"]}>
+                {t("my_safe_accounts")}
+              </Heading>
+              <List>
+                {
+                  safes.map(safe => (
+                    <ListItem key={safe}>
+                      <Grid templateColumns="repeat(3, 1fr)">
+                        <GridItem
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="left"
+                          colSpan={2}
+                        >
+                          <Text
+                            display={["block", null, null, null, "none"]}
+                            fontSize="xl"
+                            fontWeight="medium"
+                            ml={2}
+                          >
+                            {truncateAddress(safe, 6, 6)}
+                          </Text>
+                          <Text
+                            display={["none", null, null, null, "block"]}
+                            fontSize="xl"
+                            fontWeight="medium"
+                            ml={2}
+                          >
+                            {truncateAddress(safe, 14, 12)}
+                          </Text>
+                        </GridItem>
+                        <GridItem
+                          display="flex"
+                          alignItems="right"
+                          justifyContent="right"
+                          colSpan={1}
+                        >
+                          <Text fontSize="xl" fontWeight="medium" ml={2}>
+                            {`Xoc Balance: ${xocBalance[safe] as string}`}
+                          </Text>
+                        </GridItem>
+                      </Grid>
+                    </ListItem>
+
+                  ))
+                }
+              </List>
+              <Box mt={4}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={handleGaslessSendXoc}
+                  isLoading={isLoading}
+                  loadingText={t("loader_msg_closing")}
+                  spinnerPlacement="end"
+                >
+                  {t("send_xoc")}
                 </Button>
               </Box>
             </>

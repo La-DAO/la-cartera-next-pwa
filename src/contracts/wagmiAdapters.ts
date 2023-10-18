@@ -2,7 +2,7 @@ import { type PublicClient, getPublicClient } from "@wagmi/core";
 import { type WalletClient } from "@wagmi/core";
 import { providers } from "ethers";
 import { type HttpTransport } from "viem";
-import { useWalletClient } from "wagmi";
+// import { useWalletClient } from "wagmi";
 import { type ConnectedWallet } from "@privy-io/react-auth";
 
 export function publicClientToProvider(publicClient: PublicClient) {
@@ -60,17 +60,14 @@ export async function privyWagmiWalletToSigner(
  * @param param0 {ChainId}
  * @returns ethers.provider.JsonRpcSigner
  */
-export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
-  const { data: walletClient } = useWalletClient({
-    chainId,
-    onSuccess(data) {
-      console.log("Success", data);
-      console.log("wallet client?!", walletClient);
-      if (!data) return;
-      return walletClientToSigner(data);
-    },
-  });
-  console.log(walletClient);
-  if (!walletClient) return undefined;
-  return walletClientToSigner(walletClient);
-}
+// export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
+//   const { data: walletClient } = useWalletClient({
+//     chainId,
+//     onSuccess(data) {
+//       if (!data) return;
+//       return walletClientToSigner(data);
+//     },
+//   });
+//   if (!walletClient) return undefined;
+//   return walletClientToSigner(walletClient);
+// }

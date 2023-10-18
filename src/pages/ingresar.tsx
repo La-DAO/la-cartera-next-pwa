@@ -23,6 +23,8 @@ import { PageWithAppBar } from "~/components/layout/AppBar";
 import LoaderPage from "~/components/loader/LoaderPage";
 import { truncateAddress } from "~/utils/string";
 
+const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
+
 const Login = () => {
   const { t } = useTranslation("common");
   const { push } = useRouter();
@@ -41,7 +43,7 @@ const Login = () => {
           .then((res) => console.log("SET ACTIVE WALLET!!!", res))
           .catch((error) => console.error(error));
       }
-      void activeWallet?.switchChain(80001);
+      void activeWallet?.switchChain(appChainId);
       void push("/micuenta");
     },
     onError: (error) => {

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { ethers } from "ethers";
 import {
   EthersAdapter,
@@ -6,11 +7,17 @@ import {
 } from "@safe-global/protocol-kit";
 import Safe from "@safe-global/protocol-kit";
 import SafeApiKit from "@safe-global/api-kit";
-import { type SafeTransactionDataPartial } from "@safe-global/safe-core-sdk-types";
+import { GelatoRelayPack } from "@safe-global/relay-kit";
+import {
+  type SafeTransactionDataPartial,
+  type SafeMultisigTransactionResponse,
+  type MetaTransactionData,
+  type MetaTransactionOptions,
+} from "@safe-global/safe-core-sdk-types";
 import { SAFE_SERVICE_URLS } from "./safeServicesURLS";
 
 /**
- * Initiating a transaction for a Safe
+ * Initiating a transaction for a Safe using the Safe API service for storage
  * REFERENCES:
  * https://docs.safe.global/safe-core-aa-sdk/protocol-kit#making-a-transaction-from-a-safe
  */
@@ -18,18 +25,14 @@ export async function initiateSafeTx(
   originator: ethers.providers.JsonRpcSigner,
   safeAddr: string,
   toDestination: string,
-  valueIntegerAmount: string,
+  floatAmount: string,
   contractCallData: string
 ) {
-  const chainId = await getChainIdFromSigner(originator);
-  if (!SAFE_SERVICE_URLS[chainId])
-    throw `No defined Safe Service URL for chainId ${chainId}`;
-  const txServiceUrl: string = SAFE_SERVICE_URLS[chainId]!.url;
   const ethAdapter = getSafeEthersAdapter(originator);
-  const safeService = new SafeApiKit({ txServiceUrl, ethAdapter: ethAdapter });
+  const safeApiService = await buildsafeApiService(originator);
 
   // Create Safe instance
-  const safe = await Safe.create({
+  const safeSDK = await Safe.create({
     ethAdapter,
     safeAddress: safeAddr,
   });
@@ -37,22 +40,83 @@ export async function initiateSafeTx(
   const safeTransactionData: SafeTransactionDataPartial = {
     to: toDestination,
     data: contractCallData,
-    value: ethers.utils.parseEther(valueIntegerAmount).toString(),
+    value: ethers.utils.parseUnits(floatAmount, 18).toString(),
   };
 
-  const safeTransaction = await safe.createTransaction({ safeTransactionData });
+  const safeTransaction = await safeSDK.createTransaction({ safeTransactionData });
   const senderAddress = await originator.getAddress();
-  const safeTxHash = await safe.getTransactionHash(safeTransaction);
-  const signature = await safe.signTransactionHash(safeTxHash);
+  const safeTxHash = await safeSDK.getTransactionHash(safeTransaction);
+  const signature = await safeSDK.signTransactionHash(safeTxHash);
 
   // Propose transaction to the service
-  await safeService.proposeTransaction({
-    safeAddress: await safe.getAddress(),
+  await safeApiService.proposeTransaction({
+    safeAddress: await safeSDK.getAddress(),
     safeTransactionData: safeTransaction.data,
     safeTxHash,
     senderAddress,
     senderSignature: signature.data,
   });
+}
+
+export async function sendGaslessSafeTx(
+  originator: ethers.providers.JsonRpcSigner,
+  safeAddr: string,
+  toDestination: string,
+  floatAmount: string,
+  contractCallData: string
+) {
+  if (!process.env.GELATO_RELAY_API_KEY) throw "Set process.env.GELATO_RELAY_API_KEY";
+  // Create Safe instance
+  const ethAdapter = getSafeEthersAdapter(originator);
+  const safeSDK = await Safe.create({
+    ethAdapter,
+    safeAddress: safeAddr,
+  });
+
+  // Create Gelato relay key instance
+  const relayKit = new GelatoRelayPack(process.env.GELATO_RELAY_API_KEY);
+
+  // Create a transactions array with one transaction object
+  const transactions: MetaTransactionData[] = [{
+    to: toDestination,
+    data: contractCallData,
+    value: ethers.utils.parseUnits(floatAmount, 18).toString()
+  }]
+  const options: MetaTransactionOptions = {
+    isSponsored: true
+  }
+
+  const safeTransaction = await relayKit.createRelayedTransaction({
+    safe: safeSDK,
+    transactions,
+    options
+  });
+
+  const signedSafeTransaction = await safeSDK.signTransaction(safeTransaction);
+  console.log("signedSafeTransaction",signedSafeTransaction)
+  const response = await relayKit.executeRelayTransaction(
+    signedSafeTransaction,
+    safeSDK,
+    options
+  );
+  console.log(`Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`)
+}
+
+export async function getUserAssociatedSafeAccounts(
+  user: ethers.providers.JsonRpcSigner
+): Promise<string[]> {
+  const safeApiService = await buildsafeApiService(user);
+  const response = await safeApiService.getSafesByOwner(await user.getAddress());
+  return response.safes;
+}
+
+export async function getUserPendingSafeTxs(
+  user: ethers.providers.JsonRpcSigner,
+  safeAddress: string
+): Promise<SafeMultisigTransactionResponse[]> {
+  const safeApiService = await buildsafeApiService(user);
+  const response = await safeApiService.getPendingTransactions(safeAddress);
+  return response.results;
 }
 
 export function computeNewSafeAddress() {
@@ -85,6 +149,15 @@ export async function createUserPaidNewSafeAccount(
   const newSafeAccount = await safeFactory.deploySafe({ safeAccountConfig });
   const safeAddress = await newSafeAccount.getAddress();
   return safeAddress;
+}
+
+async function buildsafeApiService(etherSigner: ethers.providers.JsonRpcSigner): Promise<SafeApiKit> {
+  const chainId = await getChainIdFromSigner(etherSigner);
+  if (!SAFE_SERVICE_URLS[chainId])
+    throw `No defined Safe Service URL for chainId ${chainId}`;
+  const txServiceUrl: string = SAFE_SERVICE_URLS[chainId]!.url;
+  const ethAdapter = getSafeEthersAdapter(etherSigner);
+  return new SafeApiKit({ txServiceUrl, ethAdapter: ethAdapter });
 }
 
 function getSafeEthersAdapter(etherSigner: ethers.providers.JsonRpcSigner) {
