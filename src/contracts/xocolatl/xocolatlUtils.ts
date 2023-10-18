@@ -1,5 +1,6 @@
 import xocolatlABI from "../abis/xocolatlABI.json";
 import { ethers, type Transaction } from "ethers";
+import { sendGaslessSafeTx } from "../safeAccount/safeAccountUtils";
 
 export const XOC_ADDRESS = "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf";
 
@@ -9,15 +10,14 @@ export const XOC_ADDRESS = "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf";
 
 export type BalanceMap = Record<string, ethers.BigNumberish>
 
-
 /******************
  * WRITE METHODS
  *****************/
 
 export async function sendXoc(
-  signer: ethers.providers.JsonRpcProvider,
+  signer: ethers.providers.JsonRpcSigner,
   receiver: string,
-  intAmount: string
+  floatAmount: string
 ): Promise<Transaction | null> {
   const xocWriter = buildEthersContract(
     XOC_ADDRESS,
@@ -29,7 +29,7 @@ export async function sendXoc(
     'transfer',
     [
       receiver,
-      ethers.utils.parseUnits(intAmount, 18)
+      ethers.utils.parseUnits(floatAmount, 18)
     ]
   ) as Transaction | null;
   if (txrp == null) {
@@ -37,6 +37,23 @@ export async function sendXoc(
   } else {
     return txrp;
   }
+}
+
+export async function sendGaslessXoc(
+  signer: ethers.providers.JsonRpcSigner,
+  signerSafeAccountAddr: string,
+  receiver: string,
+  floatAmount: string
+) {
+  const data = buildSendXocData(receiver, floatAmount);
+  console.log(data);
+  await sendGaslessSafeTx(
+    signer,
+    signerSafeAccountAddr,
+    XOC_ADDRESS,
+    "0",
+    data
+  );
 }
 
 /******************
@@ -75,19 +92,19 @@ export async function readXocBalance(
 /**
  * 
  * @param receiver address who will receive amount
- * @param intAmount string in decimal form: e.g. "1.25" ether, "250" xoc
+ * @param floatAmount string in decimal form: e.g. "1.25" ether, "250" xoc
  * @returns HexString data to include in a tx
  */
 export function buildSendXocData(
   receiver: string,
-  intAmount: string
+  floatAmount: string
 ): string {
   const ifaceXoc = buildEthersInterface(JSON.stringify(xocolatlABI));
   return ifaceXoc.encodeFunctionData(
     "transfer",
     [
       receiver,
-      ethers.utils.parseUnits(intAmount, 18)
+      ethers.utils.parseUnits(floatAmount, 18)
     ]
   );
 }
@@ -126,7 +143,7 @@ async function callContractMethod(
     return result;
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(`Error calling contract method ${methodName}: ${err.message}`); 
+      console.error(`Error calling contract method ${methodName}: ${err.message}`);
     }
     return null;
   }
