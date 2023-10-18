@@ -175,7 +175,7 @@ const SendModalButton = ({ userAddress }: SendModalProps) => {
 
     console.log(parseFloat(amount), userAddress, sendToAddress);
     registerNativeTokenTx({
-      chainId: 137,
+      chainId: appChainId,
       amount: parseFloat(amount),
       senderId: userAddress,
       receiverAddress: sendToAddress,
