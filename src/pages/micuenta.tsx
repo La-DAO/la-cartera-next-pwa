@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import { useRouter } from "next/router";
+import { isAddress } from "viem";
 
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation, withTranslation } from "next-i18next";
@@ -32,7 +33,7 @@ import {
   createUserPaidNewSafeAccount,
   getUserAssociatedSafeAccounts,
 } from "../contracts/safeAccount/safeAccountUtils";
-import { type BalanceMap, readXocBalance } from "~/contracts/xocolatl/xocolatlUtils";
+import { type BalanceMap, readXocBalance, sendGaslessXoc } from "~/contracts/xocolatl/xocolatlUtils";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
@@ -124,6 +125,30 @@ const MiCuenta = () => {
       setIsLoadingCreateWallet(false);
     }
   };
+
+  const handleGaslessSendXoc = async () => {
+    if (!safes || safes.length === 0) throw "This wallet owns no Safe"
+    const userReceiverInput = prompt("Please enter an address:")!;
+    if (!isAddress(userReceiverInput)) throw "Enter valid address";
+    const amountInput = prompt("Please amount to send:")!;
+    console.log("happy", userReceiverInput, amountInput);
+    try {
+      await refetchWalletClient();
+      if (!activeWallet) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      await sendGaslessXoc(
+        ethersSigner,
+        safes[0]!,
+        userReceiverInput,
+        amountInput
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -385,6 +410,18 @@ const MiCuenta = () => {
                   ))
                 }
               </List>
+              <Box mt={4}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={handleGaslessSendXoc}
+                  isLoading={isLoading}
+                  loadingText={t("loader_msg_closing")}
+                  spinnerPlacement="end"
+                >
+                  {t("send_xoc")}
+                </Button>
+              </Box>
             </>
           ) : (
             <LoaderPage text={t("loader_msg_redirecting")} />
