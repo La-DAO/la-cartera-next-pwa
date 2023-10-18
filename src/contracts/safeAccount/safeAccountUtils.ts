@@ -65,7 +65,7 @@ export async function sendGaslessSafeTx(
   floatAmount: string,
   contractCallData: string
 ) {
-  if (!process.env.GELATO_RELAY_API_KEY) throw "Set process.env.GELATO_RELAY_API_KEY";
+  if (!process.env.NEXT_PUBLIC_GELATO_RELAY_API_KEY) throw "Set process.env.NEXT_PUBLIC_GELATO_RELAY_API_KEY";
   // Create Safe instance
   const ethAdapter = getSafeEthersAdapter(originator);
   const safeSDK = await Safe.create({
@@ -74,7 +74,7 @@ export async function sendGaslessSafeTx(
   });
 
   // Create Gelato relay key instance
-  const relayKit = new GelatoRelayPack(process.env.GELATO_RELAY_API_KEY);
+  const relayKit = new GelatoRelayPack(process.env.NEXT_PUBLIC_GELATO_RELAY_API_KEY);
 
   // Create a transactions array with one transaction object
   const transactions: MetaTransactionData[] = [{
