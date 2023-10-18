@@ -40,7 +40,7 @@ const MiCuenta = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [safes, setSafes] = useState<unknown>(null);
+  const [safes, setSafes] = useState<string[]>([]);
   const { push } = useRouter();
   const { ready, authenticated, logout, createWallet } = usePrivy();
   const { wallets } = useWallets();
@@ -71,8 +71,6 @@ const MiCuenta = () => {
   useEffect(() => {
     console.log(safes);
   });
-
-  const UNA_SAFE = activeWallet?.address;
 
   const handleCreateKey = async () => {
     setIsLoadingCreateWallet(true);
@@ -321,43 +319,48 @@ const MiCuenta = () => {
                 {t("my_safe_accounts")}
               </Heading>
               <List>
-                <ListItem key={UNA_SAFE}>
-                  <Grid templateColumns="repeat(3, 1fr)">
-                    <GridItem
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="left"
-                      colSpan={2}
-                    >
-                      <Text
-                        display={["block", null, null, null, "none"]}
-                        fontSize="xl"
-                        fontWeight="medium"
-                        ml={2}
-                      >
-                        {truncateAddress(UNA_SAFE, 6, 6)}
-                      </Text>
-                      <Text
-                        display={["none", null, null, null, "block"]}
-                        fontSize="xl"
-                        fontWeight="medium"
-                        ml={2}
-                      >
-                        {truncateAddress(UNA_SAFE, 14, 12)}
-                      </Text>
-                    </GridItem>
-                    <GridItem
-                      display="flex"
-                      alignItems="right"
-                      justifyContent="right"
-                      colSpan={1}
-                    >
-                      <Text fontSize="xl" fontWeight="medium" ml={2}>
-                        {`Xoc Balance: 12556`}
-                      </Text>
-                    </GridItem>
-                  </Grid>
-                </ListItem>
+                {
+                  safes.map(safe => (
+                    <ListItem key={safe}>
+                      <Grid templateColumns="repeat(3, 1fr)">
+                        <GridItem
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="left"
+                          colSpan={2}
+                        >
+                          <Text
+                            display={["block", null, null, null, "none"]}
+                            fontSize="xl"
+                            fontWeight="medium"
+                            ml={2}
+                          >
+                            {truncateAddress(safe, 6, 6)}
+                          </Text>
+                          <Text
+                            display={["none", null, null, null, "block"]}
+                            fontSize="xl"
+                            fontWeight="medium"
+                            ml={2}
+                          >
+                            {truncateAddress(safe, 14, 12)}
+                          </Text>
+                        </GridItem>
+                        <GridItem
+                          display="flex"
+                          alignItems="right"
+                          justifyContent="right"
+                          colSpan={1}
+                        >
+                          <Text fontSize="xl" fontWeight="medium" ml={2}>
+                            {`Xoc Balance: 12556`}
+                          </Text>
+                        </GridItem>
+                      </Grid>
+                    </ListItem>
+
+                  ))
+                }
               </List>
             </>
           ) : (
