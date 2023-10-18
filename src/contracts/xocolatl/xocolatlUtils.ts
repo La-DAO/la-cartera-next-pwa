@@ -3,6 +3,12 @@ import { ethers, type Transaction } from "ethers";
 
 export const XOC_ADDRESS = "0xa411c9Aa00E020e4f88Bc19996d29c5B7ADB4ACf";
 
+/******************
+ * DATA TYPES
+ *****************/
+
+export type BalanceMap = Record<string, ethers.BigNumberish>
+
 
 /******************
  * WRITE METHODS
@@ -57,7 +63,7 @@ export async function readXocBalance(
     return null
   } else {
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
-    return response.toString()
+    return ethers.utils.formatUnits(response, 18);
   }
 }
 
@@ -125,3 +131,4 @@ async function callContractMethod(
     return null;
   }
 }
+
