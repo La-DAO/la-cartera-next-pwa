@@ -39,7 +39,7 @@ const MiCuenta = () => {
   const { t } = useTranslation("common");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted] = useState(false);
   const [safes, setSafes] = useState<string[]>([]);
   const { push } = useRouter();
   const { ready, authenticated, logout, createWallet } = usePrivy();
