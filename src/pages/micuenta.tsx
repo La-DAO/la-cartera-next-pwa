@@ -41,6 +41,7 @@ import {
   readXocBalance,
   sendGaslessXoc,
 } from "~/contracts/xocolatl/xocolatlUtils";
+import AddressSelectableList from "~/components/micuenta/AddressSelectableList";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
@@ -49,8 +50,9 @@ const MiCuenta = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
   const [isMounted] = useState(false);
-  const [safes, setSafes] = useState<string[]>([]);
-  const [xocBalance, setXocBalance] = useState<BalanceMap>({});
+  const [safes, setSafes] = useState<string[]>();
+  const [activeSafe, setActiveSafe] = useState<string>();
+  const [xocBalances, setXocBalances] = useState<BalanceMap>({});
 
   const { push } = useRouter();
   const toast = useToast();
@@ -105,12 +107,13 @@ const MiCuenta = () => {
       );
       const safes = await getUserAssociatedSafeAccounts(ethersSigner);
       setSafes(safes);
+      setActiveSafe(safes[0])
     };
 
     if (!isMounted) {
       void buildListOfUserSafes();
     }
-  }, [activeWallet, isMounted]);
+  }, [activeWallet, isMounted, safes]);
 
   useEffect(() => {
     const getXocBalances = async () => {
@@ -128,7 +131,7 @@ const MiCuenta = () => {
           balances[safe] = bal;
         }
       }
-      setXocBalance(balances);
+      setXocBalances(balances);
     };
 
     if (!isMounted) {
@@ -253,155 +256,48 @@ const MiCuenta = () => {
           px={4}
           gap={8}
         >
+          <Heading as="h1" fontSize={["6xl"]}>
+            {'Dashboard'}
+          </Heading>
           {authenticated ? (
-            <>
-              <Heading as="h1" fontSize={["4xl"]}>
-                {t("my_keys")}
-              </Heading>
-              <Box px={4} textAlign="left" w="100%">
-                <Heading as="h2" fontSize="2xl" mb={2}>
-                  {t("active_key")}:
-                </Heading>
-                <Flex
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Text
-                    display={["block", null, null, null, "none"]}
-                    fontSize="xl"
-                    fontWeight="medium"
-                    ml={2}
-                    gap={4}
-                  >
-                    {activeWallet
-                      ? truncateAddress(activeWallet.address, 12, 10)
-                      : t("warn_no_active_key")}
-                  </Text>
-                  <Text
-                    display={["none", null, null, null, "block"]}
-                    fontSize="xl"
-                    fontWeight="medium"
-                    ml={2}
-                    gap={4}
-                  >
-                    {activeWallet
-                      ? activeWallet.address
-                      : t("warn_no_active_key")}
-                  </Text>
-                  {activeWallet && (
-                    <Link
-                      href={`https://mumbai.polygonscan.com/address/${activeWallet.address}`}
-                      target="_blank"
-                    >
-                      <IconButton
-                        aria-label="External link"
-                        variant="unstyled"
-                        icon={<ExternalLinkIcon h={5} w={5} mb={1} />}
-                      />
-                    </Link>
-                  )}
-                </Flex>
-                {activeWallet?.chainId !== "eip155:137" && (
-                  <Flex justifyContent="center" mt={4} w="100%">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={handleSwitchNetwork}
-                    >
-                      {t("change_network_button")}
-                    </Button>
-                  </Flex>
-                )}
-              </Box>
-              <Box px={4} textAlign="left" w="100%">
-                <Heading as="h2" fontSize="2xl" mb={4}>
-                  {t("available_keys")}
-                </Heading>
-                {wallets.length === 0 ? (
-                  <Text fontSize="xl" ml={2}>
-                    {t("warn_no_keys")}
-                  </Text>
-                ) : (
-                  <List>
-                    {wallets.map((wallet) => (
-                      <ListItem key={wallet.address}>
-                        <Grid templateColumns="repeat(3, 1fr)">
-                          <GridItem
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="left"
-                            colSpan={2}
-                          >
-                            <Text
-                              display={["block", null, null, null, "none"]}
-                              fontSize="xl"
-                              fontWeight="medium"
-                              ml={2}
-                            >
-                              {truncateAddress(wallet.address, 6, 6)}
-                            </Text>
-                            <Text
-                              display={["none", null, null, null, "block"]}
-                              fontSize="xl"
-                              fontWeight="medium"
-                              ml={2}
-                            >
-                              {truncateAddress(wallet.address, 14, 12)}
-                            </Text>
-                          </GridItem>
-                          <GridItem px={2}>
-                            {wallet.address === activeWallet?.address ? (
-                              <Button
-                                variant="outline"
-                                isDisabled={true}
-                                w="100%"
-                              >
-                                {t("active_state")}
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="secondary"
-                                w="100%"
-                                onClick={() => void setActiveWallet(wallet)}
-                              >
-                                {t("activate_button")}
-                              </Button>
-                            )}
-                          </GridItem>
-                        </Grid>
-                      </ListItem>
-                    ))}
-                  </List>
-                )}
-                {embeddedWallets?.length === 0 && (
-                  <Flex justifyContent="center" mt={12} w="100%">
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      onClick={handleCreateKey}
-                      isDisabled={!(ready && authenticated)}
-                      isLoading={isLoadingCreateWallet}
-                      loadingText="Creando..."
-                      spinnerPlacement="end"
-                    >
-                      {t("create_key_button")}
-                    </Button>
-                  </Flex>
-                )}
-              </Box>
-              <Box mt={4}>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={handleLogout}
-                  isLoading={isLoading}
-                  loadingText={t("loader_msg_closing")}
-                  spinnerPlacement="end"
-                >
-                  {t("logout_button")}
-                </Button>
-              </Box>
+            <AddressSelectableList
+              locale={
+                {
+                  listTitleLocale: "my_keys",
+                  active_key: "active_key",
+                  available_keys: "available_keys",
+                  warn_no_keys: "warn_no_keys",
+                  active_state: "active_state",
+                  activate_button: "activate_button"
+                }
+              }
+              activeAddress={activeWallet ? activeWallet.address : wallets[0]?.address as string}
+              activeAddressLink="https://polygonscan.com/address/"
+              addressList={wallets.map(w => w.address)}
+            />
+          ) : (
+            <LoaderPage text={t("loader_msg_redirecting")} />
+          )}
+          {
+            safes ? (
+              <AddressSelectableList
+                locale={
+                  {
+                    listTitleLocale: "my_safe_accounts",
+                    active_key: "active_safe",
+                    available_keys: "available_safes",
+                    warn_no_keys: "warn_no_safes",
+                    active_state: "active_state",
+                    activate_button: "activate_button"
+                  }
+                }
+                activeAddress={activeSafe as string}
+                activeAddressLink="https://polygonscan.com/address/"
+                addressList={safes}
+
+              />
+
+            ) : (
               <Box mt={4}>
                 <Button
                   variant="secondary"
@@ -414,82 +310,23 @@ const MiCuenta = () => {
                   {t("create_safeaccount_button")}
                 </Button>
               </Box>
-              <Heading as="h1" fontSize={["4xl"]}>
-                {t("my_safe_accounts")}
-              </Heading>
-              <List>
-                {safes.map((safe) => (
-                  <ListItem key={safe}>
-                    <Grid templateColumns="repeat(3, 1fr)">
-                      <GridItem
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="left"
-                        colSpan={2}
-                      >
-                        <Text
-                          display={["block", null, null, null, "none"]}
-                          fontSize="xl"
-                          fontWeight="medium"
-                          ml={2}
-                        >
-                          {truncateAddress(safe, 6, 6)}
-                        </Text>
-                        <Text
-                          display={["none", null, null, null, "block"]}
-                          fontSize="xl"
-                          fontWeight="medium"
-                          ml={2}
-                        >
-                          {truncateAddress(safe, 14, 12)}
-                        </Text>
-                      </GridItem>
-                      <GridItem
-                        display="flex"
-                        alignItems="right"
-                        justifyContent="right"
-                        colSpan={1}
-                      >
-                        <Text fontSize="xl" fontWeight="medium" ml={2}>
-                          {`Xoc Balance: ${xocBalance[safe] as string}`}
-                        </Text>
-                      </GridItem>
-                    </Grid>
-                  </ListItem>
-                ))}
-              </List>
-              <Box mt={4}>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={handleGaslessSendXoc}
-                  isLoading={isLoading}
-                  loadingText={t("loader_msg_closing")}
-                  spinnerPlacement="end"
-                >
-                  {t("send_xoc")}
-                </Button>
-              </Box>
-
-              <Box mt={4}>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={handleRegisterWallet}
-                  isLoading={isLoading}
-                  loadingText={t("loader_msg_closing")}
-                  spinnerPlacement="end"
-                >
-                  {t("link_embedded_wallet_button")}
-                </Button>
-              </Box>
-            </>
-          ) : (
-            <LoaderPage text={t("loader_msg_redirecting")} />
-          )}
+            )
+          }
+          <Box mt={4}>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={handleLogout}
+              isLoading={isLoading}
+              loadingText={t("loader_msg_closing")}
+              spinnerPlacement="end"
+            >
+              {t("logout_button")}
+            </Button>
+          </Box>
         </Flex>
-      </Flex>
-    </PageWithAppBar>
+      </Flex >
+    </PageWithAppBar >
   );
 };
 

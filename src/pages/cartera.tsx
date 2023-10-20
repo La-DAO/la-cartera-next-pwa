@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useRouter } from "next/router";
 import { useBalance } from "wagmi";
@@ -24,6 +24,14 @@ import SendModalButton from "~/components/cartera/SendModal";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { withTranslation } from "next-i18next";
 import nextI18nConfig from "../../next-i18next.config.mjs";
+import {
+  type BalanceMap,
+  readXocBalance
+ } from "~/contracts/xocolatl/xocolatlUtils";
+import { privyWagmiWalletToSigner } from "~/contracts/wagmiAdapters";
+import { getUserAssociatedSafeAccounts } from "~/contracts/safeAccount/safeAccountUtils";
+
+const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
 const Cartera = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +40,50 @@ const Cartera = () => {
   const { ready, authenticated, logout, createWallet } = usePrivy();
   const { wallets } = useWallets();
   const { wallet: activeWallet, setActiveWallet } = usePrivyWagmi();
+  const [isMounted] = useState(false);
+  const [safes, setSafes] = useState<string[]>([]);
+  const [xocBalance, setXocBalance] = useState<BalanceMap>({});
+
+  useEffect(() => {
+    const buildListOfUserSafes = async () => {
+      if (!activeWallet) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      const safes = await getUserAssociatedSafeAccounts(ethersSigner);
+      setSafes(safes);
+    };
+    if (!isMounted) {
+      void buildListOfUserSafes();
+    }
+  }, [activeWallet, isMounted]);
+
+
+  useEffect(() => {
+    const getXocBalances = async () => {
+      if (!activeWallet || !safes || safes.length === 0) return;
+      const ethersSigner = await privyWagmiWalletToSigner(
+        activeWallet,
+        appChainId
+      );
+      const balances: BalanceMap = {};
+      for (const safe of safes) {
+        console.log("safe", safes);
+        const bal = await readXocBalance(safe, ethersSigner.provider);
+        console.log("bal del safe", bal);
+        if (bal != null) {
+          balances[safe] = bal;
+        }
+      }
+      setXocBalance(balances);
+    };
+
+    if (!isMounted) {
+      void getXocBalances();
+    }
+  }, [activeWallet, isMounted, safes]);
+
 
   const {
     data: balance,
