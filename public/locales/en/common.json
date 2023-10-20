@@ -19,7 +19,7 @@
   "loader_msg_closing": "Closing. . .",
   "loader_msg_redirecting": "Redirecting. . .",
   "menudrawer_menu": "Menu",
-  "menudrawer_keys": "Keys",
+  "menudrawer_dashboard": "Dashboard",
   "menudrawer_settings": "Settings",
   "menudrawer_notifications": "Notifications",
   "menudrawer_home": "Home",
@@ -27,5 +27,8 @@
   "menudrawer_community": "Community",
   "menudrawer_aboutus": "About us",
   "my_safe_accounts": "My XocSafe® Accounts",
+  "available_safes": "Available Safes",
+  "active_safe": "Active Safe",
+  "warn_no_safes": "No available Safes",
   "send_xoc": "Send Xoc"
 }

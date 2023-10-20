@@ -19,7 +19,7 @@
   "loader_msg_closing": "Saliendo. . .",
   "loader_msg_redirecting": "Redireccionando. . .",
   "menudrawer_menu": "Menú",
-  "menudrawer_keys": "Llaves",
+  "menudrawer_dashboard": "Dashboard",
   "menudrawer_settings": "Configuración",
   "menudrawer_notifications": "Notificaciones",
   "menudrawer_home": "Inicio",
@@ -27,5 +27,8 @@
   "menudrawer_community": "Comunidad",
   "menudrawer_aboutus": "Nosotros",
   "my_safe_accounts": "Mis Cuentas XocSafe®",
+  "available_safes": "Safes disponibles",
+  "active_safe": "Safe Activa",
+  "warn_no_safes": "No hay Safes disponibles",
   "send_xoc": "Enviar Xoc"
 }
