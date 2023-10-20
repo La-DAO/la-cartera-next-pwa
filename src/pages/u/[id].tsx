@@ -29,31 +29,32 @@ const User = () => {
     id: userIdParams.id as string,
   });
 
-  const { mutate, isLoading: isSubmitting } = api.users.createUser.useMutation({
-    onSuccess: () => {
-      setIsLoading(false);
-      toast({
-        title: `¡Bienvenido ${usernameInputValue}!`,
-        description: "Tu nombre de usuario registrado exitosamente",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    },
-    onError: (error) => {
-      console.log(error);
-      const errorMsg =
-        error.message ?? "No fue posible crear el usuario, intenta de nuevo";
-      toast({
-        title: "Ocurrió un error...",
-        description: errorMsg,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-    },
-  });
+  const { mutate: createUser, isLoading: isSubmitting } =
+    api.users.createUser.useMutation({
+      onSuccess: () => {
+        setIsLoading(false);
+        toast({
+          title: `¡Bienvenido ${usernameInputValue}!`,
+          description: "Tu nombre de usuario registrado exitosamente",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      },
+      onError: (error) => {
+        console.log(error);
+        const errorMsg =
+          error.message ?? "No fue posible crear el usuario, intenta de nuevo";
+        toast({
+          title: "Ocurrió un error...",
+          description: errorMsg,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+      },
+    });
 
   const handleUserCreation = () => {
     setIsLoading(true);
@@ -62,9 +63,9 @@ const User = () => {
     const data = {
       id: user?.id.replace("did:privy:", "") ?? "",
       username: usernameInputValue,
-      email: userEmail ?? "",
+      email: userEmail ?? undefined,
     };
-    mutate(data);
+    createUser(data);
   };
 
   if (!ready) {
