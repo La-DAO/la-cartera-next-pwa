@@ -21,6 +21,10 @@ import { truncateAddress } from "~/utils/string";
 import { usePrivyWagmi } from "@privy-io/wagmi-connector";
 import SendModalButton from "~/components/cartera/SendModal";
 
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { withTranslation } from "next-i18next";
+import nextI18nConfig from "../../next-i18next.config.mjs";
+
 const Cartera = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
@@ -167,4 +171,13 @@ const Cartera = () => {
   );
 };
 
-export default Cartera;
+export default withTranslation("common")(Cartera);
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale, ["common"], nextI18nConfig, [
+      "es",
+      "en",
+    ])),
+  },
+});
