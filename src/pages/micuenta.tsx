@@ -20,6 +20,7 @@ import {
   List,
   ListItem,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 
@@ -28,12 +29,18 @@ import LoaderPage from "~/components/loader/LoaderPage";
 import { truncateAddress } from "~/utils/string";
 import { Link } from "@chakra-ui/next-js";
 
+import { api } from "~/utils/api";
+
 import { useWalletClient } from "wagmi";
 import {
   createUserPaidNewSafeAccount,
   getUserAssociatedSafeAccounts,
 } from "../contracts/safeAccount/safeAccountUtils";
-import { type BalanceMap, readXocBalance, sendGaslessXoc } from "~/contracts/xocolatl/xocolatlUtils";
+import {
+  type BalanceMap,
+  readXocBalance,
+  sendGaslessXoc,
+} from "~/contracts/xocolatl/xocolatlUtils";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
@@ -46,10 +53,43 @@ const MiCuenta = () => {
   const [xocBalance, setXocBalance] = useState<BalanceMap>({});
 
   const { push } = useRouter();
-  const { ready, authenticated, logout, createWallet } = usePrivy();
+  const toast = useToast();
+  const { ready, authenticated, logout, createWallet, user } = usePrivy();
   const { wallets } = useWallets();
   const { wallet: activeWallet, setActiveWallet } = usePrivyWagmi();
   const { refetch: refetchWalletClient } = useWalletClient();
+
+  const { data: userWalletsData } = api.wallets.getUserWallets.useQuery({
+    ownerId: user?.id.replace("did:privy:", "") ?? "",
+  });
+
+  const { mutate: registerWallet, isLoading: isSubmitting } =
+    api.wallets.createWallet.useMutation({
+      onSuccess: () => {
+        setIsLoading(false);
+        toast({
+          title: "Cartera registrada exitosamente",
+          description: "Puedes empezar a utilizar tu cartera",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      },
+      onError: (error) => {
+        console.log(error);
+        const errorMsg =
+          error.message ??
+          "No fue posible registrar la cartera, intenta de nuevo";
+        toast({
+          title: "Ocurrió un error...",
+          description: errorMsg,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+      },
+    });
 
   const embeddedWallets = wallets.filter(
     (wallet) =>
@@ -79,17 +119,17 @@ const MiCuenta = () => {
         activeWallet,
         appChainId
       );
-      const balances: BalanceMap = {}
+      const balances: BalanceMap = {};
       for (const safe of safes) {
-        console.log('safe', safes);
+        console.log("safe", safes);
         const bal = await readXocBalance(safe, ethersSigner.provider);
-        console.log('bal del safe', bal);
+        console.log("bal del safe", bal);
         if (bal != null) {
           balances[safe] = bal;
         }
       }
-      setXocBalance(balances)
-    }
+      setXocBalance(balances);
+    };
 
     if (!isMounted) {
       void getXocBalances();
@@ -127,7 +167,7 @@ const MiCuenta = () => {
   };
 
   const handleGaslessSendXoc = async () => {
-    if (!safes || safes.length === 0) throw "This wallet owns no Safe"
+    if (!safes || safes.length === 0) throw "This wallet owns no Safe";
     const userReceiverInput = prompt("Please enter an address:")!;
     if (!isAddress(userReceiverInput)) throw "Enter valid address";
     const amountInput = prompt("Please amount to send:")!;
@@ -148,7 +188,7 @@ const MiCuenta = () => {
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -169,6 +209,17 @@ const MiCuenta = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleRegisterWallet = () => {
+    setIsLoading(true);
+    if (!user || !embeddedWallets?.[0]?.address) return;
+    const data = {
+      ownerId: user?.id.replace("did:privy:", "") ?? "",
+      address: embeddedWallets[0]?.address,
+      type: "PRIVY" as "PRIVY" | "SAFE" | "EOA",
+    };
+    registerWallet(data);
   };
 
   useEffect(() => {
@@ -367,48 +418,45 @@ const MiCuenta = () => {
                 {t("my_safe_accounts")}
               </Heading>
               <List>
-                {
-                  safes.map(safe => (
-                    <ListItem key={safe}>
-                      <Grid templateColumns="repeat(3, 1fr)">
-                        <GridItem
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="left"
-                          colSpan={2}
+                {safes.map((safe) => (
+                  <ListItem key={safe}>
+                    <Grid templateColumns="repeat(3, 1fr)">
+                      <GridItem
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="left"
+                        colSpan={2}
+                      >
+                        <Text
+                          display={["block", null, null, null, "none"]}
+                          fontSize="xl"
+                          fontWeight="medium"
+                          ml={2}
                         >
-                          <Text
-                            display={["block", null, null, null, "none"]}
-                            fontSize="xl"
-                            fontWeight="medium"
-                            ml={2}
-                          >
-                            {truncateAddress(safe, 6, 6)}
-                          </Text>
-                          <Text
-                            display={["none", null, null, null, "block"]}
-                            fontSize="xl"
-                            fontWeight="medium"
-                            ml={2}
-                          >
-                            {truncateAddress(safe, 14, 12)}
-                          </Text>
-                        </GridItem>
-                        <GridItem
-                          display="flex"
-                          alignItems="right"
-                          justifyContent="right"
-                          colSpan={1}
+                          {truncateAddress(safe, 6, 6)}
+                        </Text>
+                        <Text
+                          display={["none", null, null, null, "block"]}
+                          fontSize="xl"
+                          fontWeight="medium"
+                          ml={2}
                         >
-                          <Text fontSize="xl" fontWeight="medium" ml={2}>
-                            {`Xoc Balance: ${xocBalance[safe] as string}`}
-                          </Text>
-                        </GridItem>
-                      </Grid>
-                    </ListItem>
-
-                  ))
-                }
+                          {truncateAddress(safe, 14, 12)}
+                        </Text>
+                      </GridItem>
+                      <GridItem
+                        display="flex"
+                        alignItems="right"
+                        justifyContent="right"
+                        colSpan={1}
+                      >
+                        <Text fontSize="xl" fontWeight="medium" ml={2}>
+                          {`Xoc Balance: ${xocBalance[safe] as string}`}
+                        </Text>
+                      </GridItem>
+                    </Grid>
+                  </ListItem>
+                ))}
               </List>
               <Box mt={4}>
                 <Button
@@ -420,6 +468,19 @@ const MiCuenta = () => {
                   spinnerPlacement="end"
                 >
                   {t("send_xoc")}
+                </Button>
+              </Box>
+
+              <Box mt={4}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={handleRegisterWallet}
+                  isLoading={isLoading}
+                  loadingText={t("loader_msg_closing")}
+                  spinnerPlacement="end"
+                >
+                  {t("link_embedded_wallet_button")}
                 </Button>
               </Box>
             </>

@@ -106,7 +106,9 @@ const Cartera = () => {
                       size="lg"
                       icon={<DownloadIcon h={6} w={6} />}
                     />
-                    <SendModalButton />
+                    <SendModalButton
+                      userAddress={activeWallet?.address ?? "0x00"}
+                    />
                   </ButtonGroup>
                 </Box>
               </Flex>

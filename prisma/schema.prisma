@@ -10,11 +10,109 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum WalletType {
+  PRIVY
+  SAFE
+  EOA
+}
 
-    @@index([name])
+enum TransactionStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+model User {
+  id                    String              @id
+  username              String              @unique
+  email                 String?              @unique
+  password              String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  privyWallet           String?             @unique
+  safeWallet            String?             @unique
+  chains                Chain[]
+  wallets               Wallet[]
+
+  @@index([username, email, privyWallet, safeWallet])
+}
+
+model Wallet {
+  address               String              @id
+  ens                   String?             @unique
+  type                  WalletType          @default(PRIVY)
+  verifiedName          String?
+  name                  String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  ownerId               String
+  owner                 User                @relation(fields: [ownerId], references: [id])
+  transactionsSent      Transaction[]       @relation("sender")
+  transactionsReceived  Transaction[]       @relation("receiver")
+  erc20txSent           Erc20TokenTransaction[]       @relation("sender")
+  erc20txReceived       Erc20TokenTransaction[]       @relation("receiver")
+  chains                Chain[]
+}
+
+model Transaction {
+  id                    String              @id @default(uuid())
+  description           String              @default("Transferencia")
+  senderId              String
+  receiverId            String?
+  receiverAddress       String
+  amount                Float
+  status                TransactionStatus   @default(PENDING)
+  chainId               Int
+  chain                 Chain               @relation(fields: [chainId], references: [id])
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  sender                Wallet              @relation("sender", fields: [senderId], references: [address])
+  receiver              Wallet?             @relation("receiver", fields: [receiverId], references: [address])
+}
+
+model Chain {
+  id                    Int                 @id
+  name                  String              @unique
+  users                 User[]
+  wallets               Wallet[]
+  transactions          Transaction[]
+  erc20transactions     Erc20TokenTransaction[]
+  erc20tokens           Erc20Token[]
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model Erc20Token {
+  contractAddress       String              @id
+  verifiedName          String?
+  name                  String
+  symbol                String
+  decimals              Int
+  totalSupply           Float
+  transactions          Erc20TokenTransaction[]
+  category              String?
+  chainId               Int
+  chain                 Chain               @relation(fields: [chainId], references: [id])
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+}
+
+model Erc20TokenTransaction {
+  id                    Int                 @id @default(autoincrement())
+  txHash                String              @unique
+  description           String              @default("Transferencia")
+  senderId              String
+  receiverId            String?
+  receiverAddress       String
+  amount                Float
+  status                TransactionStatus   @default(PENDING)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  sender                Wallet              @relation("sender", fields: [senderId], references: [address])
+  receiver              Wallet?             @relation("receiver", fields: [receiverId], references: [address])
+  erc20ContractAddress  String
+  erc20token            Erc20Token          @relation(fields: [erc20ContractAddress], references: [contractAddress])
+  chainId               Int
+  chain                 Chain               @relation(fields: [chainId], references: [id])
 }

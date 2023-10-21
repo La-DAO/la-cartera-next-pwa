@@ -1,0 +1,45 @@
+export const userObj = {
+  createdAt: "Sun Oct 08 2023 21:54:04 GMT-0500 (Central Daylight Time)",
+  email: "example@mail.com",
+  github: {
+    email: "example@mail.com",
+    name: "Guy Incognito",
+    subject: "123456789098765432123",
+    username: "example",
+  },
+  google: {
+    email: "example@mail.com",
+    name: "Guy Incognito",
+    subject: "123456789098765432123",
+  },
+  id: "did:privy:clniaudzz039jmn0f2r05q1y4",
+  linkedAccounts: [
+    {
+      address: "0x12oijfq8234urof0u3400efqsfuW0DS123upsDaS",
+      chainId: "eip155:1",
+      chainType: "ethereum",
+      connectorType: "embedded",
+      recoveryMethod: "privy",
+      type: "wallet",
+      verifiedAt: "Sun Oct 08 2023 23:31:15 GMT-0500 (Central Daylight Time)",
+      walletClient: "privy",
+      walletClientType: "privy",
+    },
+    {
+      email: "example@mail.com",
+      name: "Guy Incognito",
+      subject: "123456789098765432123",
+      type: "google_oauth",
+      verifiedAt: "Sun Oct 08 2023 21:54:04 GMT-0500 (Central Daylight Time)",
+    },
+  ],
+  wallet: {
+    address: "0x12oijfq8234urof0u3400efqsfuW0DS123upsDaS",
+    chainId: "eip155:1",
+    chainType: "ethereum",
+    connectorType: "embedded",
+    recoveryMethod: "privy",
+    walletClient: "privy",
+    walletClientType: "privy",
+  },
+};
