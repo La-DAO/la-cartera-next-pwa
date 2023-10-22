@@ -34,6 +34,8 @@ import { Link } from "@chakra-ui/next-js";
 
 import { api } from "~/utils/api";
 import { useBalance } from "wagmi";
+import { type BalanceMap } from "~/contracts/xocolatl/xocolatlUtils";
+import { BigNumber } from "ethers";
 
 const appChainId = parseInt(process.env.NEXT_PUBLIC_APP_CHAIN_ID ?? "137");
 
@@ -58,9 +60,21 @@ const placeholderRecent = [
 
 type SendModalProps = {
   userAddress: string;
+  handleGaslessSendXoc: (
+    selectedFromAddress: string,
+    sendToAddress: string,
+    amount: string
+  ) => Promise<void>;
+  safes: string[];
+  xocBalance: BalanceMap;
 };
 
-const SendModalButton = ({ userAddress }: SendModalProps) => {
+const SendModalButton = ({
+  userAddress,
+  handleGaslessSendXoc,
+  safes,
+  xocBalance,
+}: SendModalProps) => {
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [amount, setAmount] = useState("0");
   const [sendToAddress, setSendToAddress] = useState<string | null>(null);
@@ -134,6 +148,21 @@ const SendModalButton = ({ userAddress }: SendModalProps) => {
       },
     });
 
+  const findLargestBalance = (balances: BalanceMap): string => {
+    let maxAddress = "";
+    let maxBalance = 0;
+
+    for (const address in balances) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (parseFloat(balances[address]?.toString() ?? "0") > maxBalance) {
+        maxAddress = address;
+        maxBalance = parseFloat(balances[address]?.toString() ?? "0");
+      }
+    }
+
+    return maxAddress; // or return maxBalance if you need the balance instead of the address
+  };
+
   const handleOnChange = (
     event: FormEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -160,8 +189,9 @@ const SendModalButton = ({ userAddress }: SendModalProps) => {
     setSendToAddress(value);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     console.log(amount, sendToAddress);
+
     if (!sendToAddress || !amount) {
       toast({
         title: "Información incompleta",
@@ -173,13 +203,21 @@ const SendModalButton = ({ userAddress }: SendModalProps) => {
       return;
     }
 
-    console.log(parseFloat(amount), userAddress, sendToAddress);
-    registerNativeTokenTx({
-      chainId: appChainId,
-      amount: parseFloat(amount),
-      senderId: userAddress,
-      receiverAddress: sendToAddress,
-    });
+    const addressWithLargestBalance = findLargestBalance(xocBalance);
+    console.log(addressWithLargestBalance);
+    await handleGaslessSendXoc(
+      addressWithLargestBalance,
+      sendToAddress,
+      amount
+    );
+
+    // console.log(parseFloat(amount), userAddress, sendToAddress);
+    // registerNativeTokenTx({
+    //   chainId: appChainId,
+    //   amount: parseFloat(amount),
+    //   senderId: userAddress,
+    //   receiverAddress: sendToAddress,
+    // });
   };
 
   return (

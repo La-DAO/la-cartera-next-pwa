@@ -390,19 +390,10 @@ const MiCuenta = () => {
                   </Flex>
                 )}
               </Box>
-              <Box mt={4}>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={handleLogout}
-                  isLoading={isLoading}
-                  loadingText={t("loader_msg_closing")}
-                  spinnerPlacement="end"
-                >
-                  {t("logout_button")}
-                </Button>
-              </Box>
-              <Box mt={4}>
+              <Flex px={4} w="100%" justifyContent="center">
+                <Heading as="h2" textAlign="left" fontSize="2xl" mb={4}>
+                  {t("available_embedded_wallets")}
+                </Heading>
                 <Button
                   variant="secondary"
                   size="lg"
@@ -413,7 +404,7 @@ const MiCuenta = () => {
                 >
                   {t("create_safeaccount_button")}
                 </Button>
-              </Box>
+              </Flex>
               <Heading as="h1" fontSize={["4xl"]}>
                 {t("my_safe_accounts")}
               </Heading>
