@@ -8,6 +8,7 @@
   "my_keys": "Mis Llaves",
   "active_key": "Llave activa",
   "available_keys": "Llaves disponibles",
+  "available_embedded_wallets": "Cartera nativa",
   "warn_no_keys": "No hay llaves disponibles",
   "warn_no_active_key": "No hay llave activa",
   "create_key_button": "Crear llave",
