@@ -33,7 +33,8 @@ import { api } from "~/utils/api";
 
 import { useWalletClient } from "wagmi";
 import {
-  createUserPaidNewSafeAccount,
+  createSponsoredNewSafeAccount,
+  // createUserPaidNewSafeAccount,
   getUserAssociatedSafeAccounts,
 } from "../contracts/safeAccount/safeAccountUtils";
 import {
@@ -158,7 +159,7 @@ const MiCuenta = () => {
       );
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      await createUserPaidNewSafeAccount(ethersSigner);
+      await createSponsoredNewSafeAccount(ethersSigner);
     } catch (error) {
       console.error(error);
     } finally {
