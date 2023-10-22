@@ -1,4 +1,21 @@
-# La Cartera
+# LaCartera
+
+## English
+
+This project is a decentralized application (dApp) that allows any person to start using digital assets as payment method for everyday use.
+
+Developed during ETHOnline 2023 by members LaDAO.
+
+## Still in development
+
+To use it, there are still some manual steps that we need you to complete:
+- Fund your Privy wallet with some MATIC, to deploy Safe (gasless deployment is in development)
+- Deploy the XocSafe
+- Fund XocSafe with XOC (you can mint some [here](https://xocolatl.finance/) or send a mail to gm@ladao.club
+
+After that, you can start sending XOC without paying gas!
+
+## Spanish
 
 Este proyecto es una aplicación descentralizada que permite a cualquier persona empezar a utilizar activos digitales como método de pago para el día a día.
 
