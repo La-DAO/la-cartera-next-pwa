@@ -15,6 +15,7 @@ import {
   Text,
   useToast,
   useClipboard,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { ExternalLinkIcon, DownloadIcon, CopyIcon } from "@chakra-ui/icons";
 
@@ -52,6 +53,8 @@ const Cartera = () => {
   const { wallet: activeWallet, setActiveWallet } = usePrivyWagmi();
   const { refetch: refetchWalletClient } = useWalletClient();
   const [xocBalance, setXocBalance] = useState<BalanceMap>({});
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const embeddedWallets = wallets.filter(
     (wallet) =>
@@ -92,9 +95,7 @@ const Cartera = () => {
     // const userReceiverInput = prompt("Please enter an address:")!;
     // if (!isAddress(userReceiverInput)) throw "Enter valid address";
     // const amountInput = prompt("Please amount to send:")!;
-
-    console.log("happy", sendToAddress, amount);
-
+    setIsLoading(true);
     try {
       await refetchWalletClient();
       if (!activeWallet) return;
@@ -115,8 +116,12 @@ const Cartera = () => {
         duration: 5000,
         isClosable: true,
       });
+      await buildListOfUserSafes();
+      onClose();
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -324,6 +329,10 @@ const Cartera = () => {
                       icon={<DownloadIcon h={6} w={6} />}
                     />
                     <SendModalButton
+                      isOpen={isOpen}
+                      onOpen={onOpen}
+                      onClose={onClose}
+                      isLoading={isLoading}
                       safes={safes}
                       xocBalance={xocBalance}
                       userAddress={activeWallet?.address ?? "0x00"}

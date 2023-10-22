@@ -67,21 +67,28 @@ type SendModalProps = {
   ) => Promise<void>;
   safes: string[];
   xocBalance: BalanceMap;
+  isLoading: boolean;
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 };
 
 const SendModalButton = ({
+  isOpen,
   userAddress,
   handleGaslessSendXoc,
   safes,
   xocBalance,
+  isLoading,
+  onOpen,
+  onClose,
 }: SendModalProps) => {
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [amount, setAmount] = useState("0");
   const [sendToAddress, setSendToAddress] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [description, setDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
 
   const {
@@ -92,61 +99,61 @@ const SendModalButton = ({
     address: userAddress as `0x${string}`,
   });
 
-  const { mutate: registerNativeTokenTx, isLoading: isLoadingSendNativeToken } =
-    api.transactions.createTransaction.useMutation({
-      onSuccess: () => {
-        setIsLoading(false);
-        toast({
-          title: "Tu transacción ha sido enviada",
-          description: "Espera la confirmación",
-          status: "info",
-          duration: 3000,
-          isClosable: true,
-        });
-      },
-      onError: (error) => {
-        console.log(error);
-        const errorMsg =
-          error.message ??
-          "No fue posible enviar la transacción, intenta de nuevo";
-        toast({
-          title: "Ocurrió un error...",
-          description: errorMsg,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        setIsLoading(false);
-      },
-    });
+  // const { mutate: registerNativeTokenTx, isLoading: isLoadingSendNativeToken } =
+  //   api.transactions.createTransaction.useMutation({
+  //     onSuccess: () => {
+  //       setIsLoading(false);
+  //       toast({
+  //         title: "Tu transacción ha sido enviada",
+  //         description: "Espera la confirmación",
+  //         status: "info",
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
+  //     },
+  //     onError: (error) => {
+  //       console.log(error);
+  //       const errorMsg =
+  //         error.message ??
+  //         "No fue posible enviar la transacción, intenta de nuevo";
+  //       toast({
+  //         title: "Ocurrió un error...",
+  //         description: errorMsg,
+  //         status: "error",
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
+  //       setIsLoading(false);
+  //     },
+  //   });
 
-  const { mutate: registerERC20tx, isLoading: isLoadingSendERC20Token } =
-    api.erc20transactions.createErc20TokenTransaction.useMutation({
-      onSuccess: () => {
-        setIsLoading(false);
-        toast({
-          title: "Tu transacción ha sido enviada",
-          description: "Espera la confirmación",
-          status: "info",
-          duration: 3000,
-          isClosable: true,
-        });
-      },
-      onError: (error) => {
-        console.log(error);
-        const errorMsg =
-          error.message ??
-          "No fue posible enviar la transacción, intenta de nuevo";
-        toast({
-          title: "Ocurrió un error...",
-          description: errorMsg,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        setIsLoading(false);
-      },
-    });
+  // const { mutate: registerERC20tx, isLoading: isLoadingSendERC20Token } =
+  //   api.erc20transactions.createErc20TokenTransaction.useMutation({
+  //     onSuccess: () => {
+  //       setIsLoading(false);
+  //       toast({
+  //         title: "Tu transacción ha sido enviada",
+  //         description: "Espera la confirmación",
+  //         status: "info",
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
+  //     },
+  //     onError: (error) => {
+  //       console.log(error);
+  //       const errorMsg =
+  //         error.message ??
+  //         "No fue posible enviar la transacción, intenta de nuevo";
+  //       toast({
+  //         title: "Ocurrió un error...",
+  //         description: errorMsg,
+  //         status: "error",
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
+  //       setIsLoading(false);
+  //     },
+  //   });
 
   const findLargestBalance = (balances: BalanceMap): string => {
     let maxAddress = "";
@@ -506,6 +513,9 @@ const SendModalButton = ({
                         size="lg"
                         w={"50%"}
                         onClick={() => handleSend()}
+                        isLoading={isLoading}
+                        isDisabled={isLoading}
+                        loadingText="Enviando tx"
                       >
                         Enviar
                       </Button>
