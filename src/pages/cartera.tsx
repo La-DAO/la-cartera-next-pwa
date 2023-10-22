@@ -14,8 +14,9 @@ import {
   Link,
   Text,
   useToast,
+  useClipboard,
 } from "@chakra-ui/react";
-import { ExternalLinkIcon, DownloadIcon } from "@chakra-ui/icons";
+import { ExternalLinkIcon, DownloadIcon, CopyIcon } from "@chakra-ui/icons";
 
 import { PageWithAppBar } from "~/components/layout/AppBar";
 import LoaderPage from "~/components/loader/LoaderPage";
@@ -40,9 +41,11 @@ const Cartera = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCreateWallet, setIsLoadingCreateWallet] = useState(false);
   const [safes, setSafes] = useState<string[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isSafeLoaded, setIsSafeLoaded] = useState(false);
   const { push } = useRouter();
+  const { onCopy, value, setValue, hasCopied } = useClipboard("");
 
   const { ready, authenticated, logout, createWallet, user } = usePrivy();
   const { wallets } = useWallets();
@@ -64,6 +67,21 @@ const Cartera = () => {
   });
 
   const toast = useToast();
+
+  const findLargestBalance = (balances: BalanceMap): string => {
+    let maxAddress = "";
+    let maxBalance = 0;
+
+    for (const address in balances) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (parseFloat(balances[address]?.toString() ?? "0") > maxBalance) {
+        maxAddress = address;
+        maxBalance = parseFloat(balances[address]?.toString() ?? "0");
+      }
+    }
+
+    return maxAddress; // or return maxBalance if you need the balance instead of the address
+  };
 
   const handleGaslessSendXoc = async (
     selectedFromAddress: string,
@@ -156,10 +174,13 @@ const Cartera = () => {
         balances[safe] = bal;
       }
     }
+    const largestBalAddress = findLargestBalance(balances);
     console.log(balances);
     setXocBalance(balances);
+    setSelectedAddress(largestBalAddress);
+    setValue(largestBalAddress);
     setIsSafeLoaded(true);
-  }, [activeWallet]);
+  }, [activeWallet, setValue]);
 
   // const getXocBalances = useCallback(async () => {
   //   if (!activeWallet || !safes || safes.length === 0) return;
@@ -250,16 +271,24 @@ const Cartera = () => {
                     fontWeight="medium"
                     color="ldWhiteBeige"
                   >
-                    {Number.parseFloat(balance?.formatted ?? "0").toFixed(2)}
+                    {Number.parseFloat(
+                      xocBalance[selectedAddress ?? ""]?.toString() ??
+                        balance?.formatted ??
+                        "0"
+                    ).toFixed(2)}
                   </Heading>
-                  <Heading
-                    as="span"
-                    fontSize={["4xl"]}
-                    mt={4}
-                    color="ldWhiteBeige"
+                  <Flex
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="end"
                   >
-                    {balance?.symbol}
-                  </Heading>
+                    <Text as="span" fontSize={["2xl"]} color="ldWhiteBeige">
+                      XOC
+                    </Text>
+                    <Text fontSize={["lg"]} color="ldWhiteBeige">
+                      mxn
+                    </Text>
+                  </Flex>
                 </Flex>
                 <Box>
                   <ButtonGroup gap="4">
@@ -304,9 +333,29 @@ const Cartera = () => {
                 </Box>
               </Flex>
               <Box px={4} textAlign="left" w="100%">
-                <Heading as="h2" fontSize="2xl" mb={2}>
-                  Cartera activa:
-                </Heading>
+                <Flex>
+                  <Heading as="h2" fontSize="2xl" mb={2}>
+                    Cartera activa:
+                  </Heading>
+                  <IconButton
+                    aria-label="Copy to clipboard"
+                    rounded="full"
+                    colorScheme="orange"
+                    size="sm"
+                    ml={3}
+                    icon={<CopyIcon />}
+                    onClick={() => {
+                      onCopy();
+                      toast({
+                        title: "Dirección copiada",
+                        description: `Comparte tu dirección para recibir pesos`,
+                        status: "info",
+                        duration: 5000,
+                        isClosable: true,
+                      });
+                    }}
+                  />
+                </Flex>
                 <Flex
                   display="flex"
                   alignItems="center"
@@ -319,9 +368,13 @@ const Cartera = () => {
                     ml={2}
                     gap={4}
                   >
-                    {activeWallet
-                      ? truncateAddress(activeWallet.address, 12, 10)
-                      : "No tienes cartera activa"}
+                    {selectedAddress
+                      ? truncateAddress(
+                          selectedAddress ?? activeWallet?.address ?? "0",
+                          12,
+                          10
+                        )
+                      : "No tienes XocSafe"}
                   </Text>
                   <Text
                     display={["none", null, null, null, "block"]}
@@ -334,9 +387,11 @@ const Cartera = () => {
                       ? activeWallet.address
                       : "No tienes cartera activa"}
                   </Text>
-                  {activeWallet && (
+                  {selectedAddress && (
                     <Link
-                      href={`https://mumbai.polygonscan.com/address/${activeWallet.address}`}
+                      href={`https://polygonscan.com/address/${
+                        selectedAddress ?? activeWallet?.address ?? "0x00"
+                      }`}
                       target="_blank"
                     >
                       <IconButton
